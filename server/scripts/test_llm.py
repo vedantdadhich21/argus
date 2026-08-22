@@ -20,13 +20,14 @@ def run_llm_diagnostic():
     print("  APK Sentinel - LLM Connectivity & Schema Test")
     print("=" * 60)
 
-    base_url = os.environ.get("LLM_BASE_URL", "https://api.openai.com/v1")
-    model = os.environ.get("LLM_MODEL", "gpt-4o-mini")
-    api_key = os.environ.get("LLM_API_KEY", "")
+    analyst = AiAnalyst()
+    base_url = analyst.base_url
+    model = analyst.model
+    api_key = analyst.api_key
 
     print(f"Provider Base URL : {base_url}")
     print(f"Model Name        : {model}")
-    print(f"API Key Configured: {'YES' if api_key else 'NO (running heuristic fallback)'}")
+    print(f"API Key Configured: {'YES (sk-...)' if api_key else 'NO (running heuristic fallback)'}")
     print("-" * 60)
 
     # 1. Synthesize a mock suspicious method

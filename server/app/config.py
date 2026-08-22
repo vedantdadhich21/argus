@@ -9,6 +9,13 @@ from typing import List
 from pydantic_settings import BaseSettings
 
 
+import os
+from pathlib import Path
+
+_SERVER_ROOT = Path(__file__).resolve().parent.parent
+_ENV_PATH = _SERVER_ROOT / ".env"
+
+
 class Settings(BaseSettings):
     # Server
     port: int = 8000
@@ -35,7 +42,7 @@ class Settings(BaseSettings):
     max_concurrent_scans: int = 2
 
     class Config:
-        env_file = ".env"
+        env_file = str(_ENV_PATH)
         env_file_encoding = "utf-8"
         extra = "ignore"
 

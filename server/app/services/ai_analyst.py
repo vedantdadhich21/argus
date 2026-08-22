@@ -111,14 +111,24 @@ class AiAnalyst:
         model: Optional[str] = None,
         timeout_seconds: Optional[int] = None,
     ):
+        cfg = None
+        try:
+            from app.config import get_settings
+            cfg = get_settings()
+        except Exception:
+            pass
+
         self.base_url = (
             base_url
-            or os.environ.get("LLM_BASE_URL", "https://api.openai.com/v1").rstrip("/")
-        )
-        self.api_key = api_key or os.environ.get("LLM_API_KEY", "")
-        self.model = model or os.environ.get("LLM_MODEL", "gpt-4o-mini")
-        self.timeout_seconds = timeout_seconds or int(
-            os.environ.get("LLM_TIMEOUT_SECONDS", "45")
+            or (cfg.llm_base_url if cfg else None)
+            or os.environ.get("LLM_BASE_URL", "https://api.openai.com/v1")
+        ).rstrip("/")
+        self.api_key = api_key or (cfg.llm_api_key if cfg else None) or os.environ.get("LLM_API_KEY", "")
+        self.model = model or (cfg.llm_model if cfg else None) or os.environ.get("LLM_MODEL", "gpt-4o-mini")
+        self.timeout_seconds = (
+            timeout_seconds
+            or (cfg.llm_timeout_seconds if cfg else None)
+            or int(os.environ.get("LLM_TIMEOUT_SECONDS", "45"))
         )
 
     def is_configured(self) -> bool:
