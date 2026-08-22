@@ -16,6 +16,7 @@ Stage order (Reference §8):
 
 import json
 import logging
+import os
 import time
 import traceback
 from datetime import datetime
@@ -33,6 +34,7 @@ from app.services import (
     rules_engine,
     static_analysis,
 )
+from app.services.storage import get_decompiled_dir, get_report_path
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -232,66 +234,101 @@ def _run_stages(scan_id: str, apk_path: str, original_filename: str, db: Session
         db.commit()
 
     # -------------------------------------------------------------------------
-    # Stage 7: AI analysis (Person B — stub)
+    # Stage 7: AI analysis — Person B's AiAnalyst
     # -------------------------------------------------------------------------
     _set_status(scan_id, "ai_analysis", db)
     ai_analysis_result = None
     ai_status = "unavailable"
+    fraud_category = None
+    final_score = rule_score
 
     try:
-        # Person B owns this — import guard prevents crash if not yet implemented
-        from app.services import ai_analyst  # type: ignore
-        ai_analysis_result, ai_status = ai_analyst.analyze(
-            scan_id          = scan_id,
-            app_metadata     = static_result.get("app_metadata", {}),
-            permissions      = static_result.get("permissions", []),
-            pattern_hits     = pattern_hits,
-            iocs             = iocs,
-            triggers         = triggers,
-            decompiled_ok    = decompiled_ok,
+        from app.services.ai_analyst import AiAnalyst
+        from app.services.method_selector import MethodSelector
+        from app.config import get_settings as _get_settings
+        _cfg = _get_settings()
+
+        # Build method list from decompiled output (B's MethodSelector)
+        decompiled_dir = get_decompiled_dir(scan_id)
+        selector = MethodSelector(
+            max_methods=_cfg.llm_max_methods,
+            max_chars_per_method=_cfg.llm_max_chars_per_method,
         )
-        # AI may return score adjustment
-        if isinstance(ai_analysis_result, dict):
+        methods = selector.select_top_methods_from_directory(decompiled_dir) if decompiled_ok else []
+
+        # Flatten permissions to list of strings (AiAnalyst expects strings)
+        perm_names = [p["name"] for p in (static_result.get("permissions") or [])]
+
+        analyst = AiAnalyst()
+        ai_result_obj, ai_status = analyst.analyze(
+            scan_id        = scan_id,
+            package_name   = (static_result.get("app_metadata") or {}).get("package_name", ""),
+            permissions    = perm_names,
+            triggered_rules= triggers,          # [{rule_id, description, weight, evidence}]
+            static_iocs    = iocs,
+            methods        = methods,
+        )
+
+        if ai_result_obj is not None:
+            ai_analysis_result = ai_result_obj.model_dump()
             fraud_category = ai_analysis_result.get("fraud_category")
-            # AI score adjustment ±5 from rule_score
-            ai_score_adj = ai_analysis_result.get("score_adjustment", 0)
-            final_score = max(0, min(100, rule_score + ai_score_adj))
-        else:
-            fraud_category = None
+            # AI may adjust score ±5; default is no adjustment
             final_score = rule_score
 
     except ImportError:
-        # Person B hasn't implemented ai_analyst yet — graceful degradation
-        logger.info("[%s] ai_analyst not available — using rules-only verdict", scan_id)
-        fraud_category = None
-        final_score = rule_score
-        ai_status = "unavailable"
+        logger.info("[%s] ai_analyst/method_selector not available — rules-only verdict", scan_id)
 
     except Exception as exc:
         logger.error("[%s] Stage 7 (ai_analyst) failed: %s", scan_id, exc, exc_info=True)
-        fraud_category = None
-        final_score = rule_score
-        ai_status = "unavailable"
 
     # -------------------------------------------------------------------------
-    # Stage 8: Report generation (Person B — stub)
+    # Stage 8: Report generation — Person B's ReportGenerator
     # -------------------------------------------------------------------------
     _set_status(scan_id, "building_report", db)
     report_markdown = None
 
     try:
-        from app.services import report_generator  # type: ignore
-        report_markdown = report_generator.build(
-            scan_id       = scan_id,
-            app_metadata  = static_result.get("app_metadata", {}),
-            permissions   = static_result.get("permissions", []),
-            triggers      = triggers,
-            iocs          = iocs,
-            ai_analysis   = ai_analysis_result,
-            rule_score    = rule_score,
-            final_score   = final_score,
-            severity      = severity,
+        from app.services.report_generator import ReportGenerator
+        from datetime import timezone
+
+        generator = ReportGenerator()
+        meta = static_result.get("app_metadata") or {}
+
+        # Unpack AI analysis fields (may be None if LLM unavailable)
+        behavior_summary   = (ai_analysis_result or {}).get("behavior_summary")
+        attack_chain       = (ai_analysis_result or {}).get("attack_chain", [])
+        mitre_techniques   = (ai_analysis_result or {}).get("mitre_techniques", [])
+        recommendations    = (ai_analysis_result or {}).get("recommendations", [])
+
+        # Pull sha256/md5 from the Scan row
+        _scan_row = db.query(Scan).filter(Scan.id == scan_id).first()
+
+        report_markdown = generator.build_markdown_report(
+            app_label          = meta.get("label") or meta.get("package_name", "Unknown App"),
+            package_name       = meta.get("package_name", ""),
+            sha256             = _scan_row.sha256 if _scan_row else "",
+            md5                = _scan_row.md5 if _scan_row else None,
+            file_size_bytes    = _scan_row.file_size_bytes if _scan_row else None,
+            final_score        = final_score,
+            severity           = severity,
+            fraud_category     = fraud_category or "unclassified",
+            analysis_timestamp = datetime.utcnow().replace(tzinfo=timezone.utc),
+            behavior_summary   = behavior_summary,
+            attack_chain       = attack_chain,
+            triggers           = triggers,
+            permissions        = static_result.get("permissions", []),
+            iocs               = iocs,
+            mitre_techniques   = mitre_techniques,
+            recommendations    = recommendations,
         )
+
+        # Also save to disk
+        from app.services.storage import get_report_path
+        report_path = get_report_path(scan_id)
+        os.makedirs(os.path.dirname(report_path), exist_ok=True)
+        with open(report_path, "w", encoding="utf-8") as f:
+            f.write(report_markdown)
+
     except ImportError:
         logger.info("[%s] report_generator not available — skipping report", scan_id)
     except Exception as exc:
