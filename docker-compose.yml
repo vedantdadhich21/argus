@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: apk-sentinel-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - DATABASE_URL=sqlite:///./storage/sentinel.db
+      - STORAGE_DIR=./storage
+      - MAX_UPLOAD_MB=100
+      - SCAN_TIMEOUT_SECONDS=120
+      - JADX_PATH=jadx
+      - CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+      - LLM_BASE_URL=${LLM_BASE_URL:-https://api.openai.com/v1}
+      - LLM_API_KEY=${LLM_API_KEY:-}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+      - LLM_TIMEOUT_SECONDS=45
+    volumes:
+      - ./server/storage:/app/storage
+    restart: unless-stopped

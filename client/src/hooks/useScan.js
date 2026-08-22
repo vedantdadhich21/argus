@@ -2,7 +2,10 @@ import { useQuery } from '@tanstack/react-query'
 import { api, USE_MOCKS } from '../api/client'
 import mockData from '../mocks/scanResponse.json'
 
-const WORKING_STATUSES = ['queued', 'static_analysis', 'decompiling', 'ai_analysis']
+const WORKING_STATUSES = [
+  'queued', 'static_analysis', 'decompiling', 'pattern_scanning',
+  'ioc_extraction', 'scoring', 'ai_analysis', 'building_report'
+]
 
 // Simulate mock pipeline progression
 let mockCallCount = 0

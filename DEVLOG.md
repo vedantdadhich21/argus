@@ -20,7 +20,11 @@ Keep entries ≤ 15 lines. Link to commits where useful. Checkpoint merges (CP1/
 
 ## Entries
 
-### [Block 3 · A] Integrated Person B's AI services into main — main
+### [Checkpoint 1 · All] Merged c/frontend into main + E2E smoke tests verified — main
+- Did: Merged `origin/c/frontend` into `main`. Verified client dependencies install and build (`npm run build` generates clean dist bundle). Updated `useScan.js` and `ScanDetail.jsx` to poll across all 8 pipeline stage statuses. Built `server/scripts/smoke.sh` E2E test suite, `server/Dockerfile`, and `docker-compose.yml`.
+- How: All 8 smoke tests passed end-to-end against live backend: Health check, Stats, APK upload, polling state machine, hash cache lookup, scan history, report download, and 415 rejection.
+- Gotchas: In `useScan.js` and `ScanDetail.jsx`, `WORKING_STATUSES` was missing intermediate stage names (`pattern_scanning`, `ioc_extraction`, `scoring`, `building_report`) which caused polling to stop prematurely — now updated.
+- Next: Checkpoint 1 complete. Block 3 Android native scanner app & physical device testing.
 - Did: cherry-picked B's `ai_analyst.py`, `method_selector.py`, `report_generator.py`, fixtures (`SmsReceiver.java`, `PayloadLoader.java`, `CryptoHelper.java`, `KeyloggerService.java`, `OverlayService.java`, `ContactHarvester.java`), `scripts/test_llm.py` into `main`. Updated `pipeline.py` stages 7–8 to call B's actual class-based APIs (`AiAnalyst.analyze()`, `ReportGenerator.build_markdown_report()`).
 - How: B uses class instances not module-level functions. `AiAnalyst.analyze()` takes `(scan_id, package_name, permissions: List[str], triggered_rules, static_iocs, methods)`. `ReportGenerator.build_markdown_report()` takes 17 named args. Pipeline flattens permission dicts to strings before passing. Report is saved to disk at `storage/reports/<scan_id>_report.md` and returned via API.
 - Gotchas: (1) Missing `import os` and `from app.services.storage import get_decompiled_dir` in pipeline stage 7–8 block — now fixed. (2) `ai_status: unavailable` is correct behavior when no `LLM_API_KEY` in `.env` — B's heuristic fallback produces a valid schema but `analyze()` returns `None` without a key (by design). (3) jadx exits code 3 on our debug APK (partial output) — gracefully handled, pattern scan still runs.

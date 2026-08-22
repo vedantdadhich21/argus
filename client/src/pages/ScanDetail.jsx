@@ -12,7 +12,10 @@ import ReactMarkdown from 'react-markdown'
 
 const TABS = ['Overview', 'Findings', 'AI Analysis', 'IOCs', 'Report']
 
-const WORKING = ['queued', 'static_analysis', 'decompiling', 'ai_analysis']
+const WORKING = [
+  'queued', 'static_analysis', 'decompiling', 'pattern_scanning',
+  'ioc_extraction', 'scoring', 'ai_analysis', 'building_report'
+]
 
 export default function ScanDetail() {
   const { id } = useParams()
