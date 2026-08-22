@@ -20,6 +20,12 @@ Keep entries ≤ 15 lines. Link to commits where useful. Checkpoint merges (CP1/
 
 ## Entries
 
+### [H+2.0h · Block 0/1] Person B — b/genai
+- Did: implemented `method_selector.py`, `ai_analyst.py`, `report_generator.py`, `scripts/test_llm.py`, and 6 realistic decompiled Java fixtures in `server/fixtures/decompiled_sample/` (`SmsReceiver.java`, `PayloadLoader.java`, `CryptoHelper.java`, `KeyloggerService.java`, `OverlayService.java`, `ContactHarvester.java`).
+- How: `ai_analyst.py` enforces frozen §9 Pydantic schema with robust markdown/JSON extraction and graceful degraded path (`ai_status: unavailable`) when API key is missing. `method_selector.py` scores & ranks methods by pattern matches. `report_generator.py` produces full Markdown investigation reports per §10.
+- Gotchas: Windows console encoding requires safe fallback for emoji output; degraded path ensures backend and tests never crash when unconfigured.
+- Next: tune LLM prompt against full pipeline output when Person A merges CP1; prepare fake_banker & benign demo samples.
+
 ### [Pre-hackathon · Block 0] ✅ RISK SPIKE PASSED — main
 - Did: tested on physical device (Nothing A015, wireless debugging). Tapped a real .apk in Files app → chooser offered "Sentinel Shield" → Logcat `tag:Sentinel` shows full chain: `intercepted URI: content://com.google.android.apps.nbu.files.provider/…` → `read 17534594 bytes` (= exactly 17.53 MB decimal, matches file listing) → `zip magic=[80, 75]`. Interception + ContentResolver streaming both confirmed.
 - How: §14 manifest filter registered first try; no fallback needed — native phone flow is GO for Block 3. Byte count matching the visible file size doubles as a read-integrity check.
