@@ -61,6 +61,16 @@ export default function ScanDetail() {
         {/* Verdict card */}
         <VerdictCard scan={scan} />
 
+        {/* AI Degradation Alert Banner if applicable */}
+        {scan.ai_status === 'unavailable' && (
+          <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 flex items-start gap-3 text-xs text-amber-300">
+            <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5 text-amber-400" />
+            <div>
+              <span className="font-semibold">AI Behavioral Analysis Offline:</span> The Generative AI layer is currently operating in degraded mode. The threat score, triggered rules, and IOCs above are fully verified via our deterministic static and bytecode analysis engine.
+            </div>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="mt-8 flex gap-1 border-b border-white/5">
           {TABS.map(t => (

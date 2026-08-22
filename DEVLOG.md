@@ -20,6 +20,12 @@ Keep entries ≤ 15 lines. Link to commits where useful. Checkpoint merges (CP1/
 
 ## Entries
 
+### [H+8.0h · Block 2/3] Person C — c/frontend
+- Did: Complete Android Sentinel Shield app built in `android/` (`Models.kt`, `SentinelClient.kt`, `InstallHandoff.kt`, `Screens.kt`, updated `MainActivity.kt`, enabled `usesCleartextTraffic`). Enhanced Web Dashboard in `client/` (`ScanDetail.jsx` AI degradation banner, IOC copy cells, history filters).
+- How: Native HTTP client streams APK multipart and calculates SHA-256/MD5 for fast-path hash check (`POST /api/lookup/hash`). Full Jetpack Compose RYG VerdictScreen with install handoff for safe APKs and block actions for critical/banking malware.
+- Gotchas: Added `android:usesCleartextTraffic="true"` for LAN/IP testing; `local.properties` configured for Windows Android SDK. Verified `./gradlew assembleDebug` (21s) and `npm run build` both build clean.
+- Next: Checkpoint 2 (CP2) full end-to-end integration testing with backend on LAN/WiFi.
+
 ### [H+3.5h · Block 1] Person C — c/frontend
 - Did: Full dashboard scaffolded in `client/` (Vite, React 18, Tailwind CSS, TanStack Query v5, Axios, React Router v6). Built all pages (Home, ScanDetail, History, ApiDocs) & components (Dropzone, RiskGauge, VerdictCard, PipelineStatus, ScoreBreakdown, PermissionTable, AttackChain, IocTable, MitreList, AiFindings).
 - How: Mapped against frozen fixture `client/src/mocks/scanResponse.json` (§11). `VITE_USE_MOCKS=true` simulates artificial pipeline delays without needing backend.
