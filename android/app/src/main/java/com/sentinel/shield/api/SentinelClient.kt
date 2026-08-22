@@ -19,7 +19,7 @@ class SentinelClient(private var baseUrl: String = DEFAULT_BASE_URL) {
 
     companion object {
         const val TAG = "SentinelClient"
-        var DEFAULT_BASE_URL = "http://10.0.2.2:8000" // 10.0.2.2 for Android Emulator, LAN IP for physical device
+        var DEFAULT_BASE_URL = "http://192.168.0.247:8000" // 10.0.2.2 for Android Emulator, LAN IP:PORT for physical device
         const val CONNECT_TIMEOUT_MS = 15_000
         const val READ_TIMEOUT_MS = 60_000
 
