@@ -17,7 +17,7 @@ from app.services.method_selector import Method
 
 def run_llm_diagnostic():
     print("=" * 60)
-    print("  APK Sentinel - LLM Connectivity & Schema Test")
+    print("  Argus - LLM Threat Intelligence & Schema Test")
     print("=" * 60)
 
     analyst = AiAnalyst()

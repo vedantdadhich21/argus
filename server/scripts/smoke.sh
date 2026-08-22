@@ -19,7 +19,7 @@ else
 fi
 
 echo "========================================================"
-echo "🛡️  APK Sentinel — E2E Smoke Test"
+echo "🛡️  Argus — E2E Smoke Test"
 echo "Target Base URL: $BASE_URL"
 echo "Test Sample APK: $SAMPLE_APK"
 echo "========================================================"

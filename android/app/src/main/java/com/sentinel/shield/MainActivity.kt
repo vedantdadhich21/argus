@@ -177,10 +177,10 @@ class MainActivity : ComponentActivity() {
                     finalScore = hashResult.finalScore ?: 85,
                     fraudCategory = hashResult.fraudCategory ?: "banking_trojan",
                     triggers = listOf(
-                        TriggerItem("HASH_THREAT_MATCH", "Previously identified banking fraud signature", 50),
-                        TriggerItem("PERM_SMS_INTERCEPTION", "OTP interception and exfiltration capability", 35)
+                        TriggerItem("HASH_THREAT_MATCH", "Previously identified malicious cyber threat signature", 50),
+                        TriggerItem("PERM_SMS_INTERCEPTION", "Unauthorized credential harvesting capability", 35)
                     ),
-                    behaviorSummary = "Cryptographic hash matches confirmed banking malware payload recorded in threat intelligence."
+                    behaviorSummary = "Cryptographic hash matches confirmed malicious payload recorded in Argus threat intelligence."
                 )
             }
 
@@ -207,7 +207,7 @@ class MainActivity : ComponentActivity() {
                     TriggerItem("OFFLINE_HEURISTIC", "Interception intent verified. Unregistered third-party origin.", 40),
                     TriggerItem("UNVERIFIED_CERTIFICATE", "Application package is not distributed via Play Store.", 32)
                 ),
-                behaviorSummary = "Sentinel Shield intercepted this sideloaded application before installation."
+                behaviorSummary = "Argus intercepted this sideloaded application before installation."
             )
             addToHistory(fileName, fallbackVerdict)
             uiState = ScreenState.Verdict(fallbackVerdict, uri)

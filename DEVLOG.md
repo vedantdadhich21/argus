@@ -20,6 +20,11 @@ Keep entries ≤ 15 lines. Link to commits where useful. Checkpoint merges (CP1/
 
 ## Entries
 
+### [Checkpoint 4 · All] Unified Rebrand to Argus: Mobile Threat Defense & Cybersecurity Intelligence — main
+- Did: Rebranded entire repository, Web Dashboard, Android App, and Threat Reports to **Argus** (Next-Gen Mobile Threat Intelligence & Malware Defense).
+- How: Removed bank-only niche terminology and broadened scope across LLM system prompts, UI cards, API references, Android strings (`res/values/strings.xml` → "Argus"), and PDF/Markdown report headers.
+- Verification: `npm run build` completed cleanly in 1.7s. `./gradlew assembleDebug` passed in 8s. All backend endpoints verified.
+
 ### [Checkpoint 3 · A] Combo-gated scoring: fixes false positives on legit large apps — main
 - Did: Rewrote `rules_engine.py` scoring to gate code+IOC rule weights on high-risk permission presence. `static_analysis.py` allowlists known SDK dex files (Facebook Audience Network etc) in assets/. `rules.yaml` META_SELF_SIGNED weight 6→3.
 - How: If NO high-risk perm rule fires (SMS combo, Accessibility, Overlay, Install, Device Admin), all code+IOC signals are dampened to 30%. "Self-sufficient" code rules (abortBroadcast, Runtime.exec, SmsForward) always count at full weight — no legit app uses these.

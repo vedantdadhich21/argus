@@ -14,12 +14,12 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-slate-950/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-red-500 to-orange-500 shadow-lg shadow-red-500/20 group-hover:shadow-red-500/40 transition-shadow">
-            <Shield className="h-4 w-4 text-white" />
+        <Link to="/" className="flex items-center gap-2.5 font-bold text-lg text-white group">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-lg shadow-red-500/20 group-hover:shadow-red-500/40 transition-shadow">
+            <Shield className="w-4 h-4 text-white" />
           </div>
-          <span className="text-sm font-bold text-white tracking-tight">
-            APK <span className="text-red-400">Sentinel</span>
+          <span className="tracking-tight">
+            <span className="text-white">Argus</span>
           </span>
         </Link>
 

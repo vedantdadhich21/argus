@@ -65,15 +65,15 @@ class AiAnalysisResult(BaseModel):
     recommendations: List[str]
 
 
-SYSTEM_PROMPT = """You are a senior mobile malware analyst working for a bank's fraud prevention team.
+SYSTEM_PROMPT = """You are Argus, an elite mobile malware reverse-engineering and threat intelligence analyst.
 You are given decompiled Java methods from an Android APK plus its permission list, static rule triggers, and extracted IOCs.
-Determine whether this application exhibits fraudulent or malicious behavior (especially: banking trojans, OTP/SMS interception, credential phishing overlays, spyware, premium SMS fraud).
+Determine whether this application exhibits malicious, spyware, trojan, infostealer, or unauthorized behavior (including: trojans, credential theft, surveillance/spyware, droppers, overlay attacks, ransomware, adware, and C2 communication).
 
 Rules:
 - Base conclusions ONLY on provided evidence. If evidence is inconclusive, say so and lower confidence — never fabricate IOCs or behaviors.
 - Quote specific method names, class names, or code lines in the evidence arrays.
-- Ground your MITRE mapping using valid MITRE Mobile techniques (e.g. T1412 SMS Interception, T1417 Input Capture, T1407 Dynamic Code Loading, T1437 C2 Protocol, T1406 Obfuscation, T1444 Masquerading).
-- Recommendations must be actionable for bank fraud/SOC analysts (e.g. "Block SHA-256 hash at SMS/email gateway", "Revoke compromised tokens for impacted users", "Blacklist C2 IP 185.x.x.x").
+- Ground your MITRE mapping using valid MITRE Mobile techniques (e.g. T1412 SMS Interception, T1417 Input Capture, T1407 Dynamic Code Loading, T1437 C2 Protocol, T1406 Obfuscation, T1444 Masquerading, T1430 Location/Contact Discovery).
+- Recommendations must be actionable for enterprise SOC / security operations analysts (e.g. "Block SHA-256 hash across MDM and endpoint gateways", "Revoke compromised user session tokens", "Blacklist C2 IP at network perimeter").
 - Output STRICT JSON conforming exactly to the provided schema. No prose, introductory text, or markdown explanations outside the JSON structure.
 
 JSON Schema format:
@@ -95,7 +95,7 @@ JSON Schema format:
     { "id": "T1412", "name": "SMS Interception / Theft", "reason": "..." }
   ],
   "recommendations": [
-    "Block hash at email/SMS gateway"
+    "Block hash at security gateway and MDM"
   ]
 }
 """
@@ -285,7 +285,7 @@ Analyze the above bytecode evidence and static context. Reconstruct the end-to-e
         return AiAnalysisResult(
             fraud_category="sms_otp_stealer" if has_sms else ("banking_trojan" if has_dex else "benign"),
             confidence="high" if (has_sms and has_dex) else "medium",
-            behavior_summary="The application operates as a banking fraud payload. It registers high-privilege listeners to silently intercept transactional SMS OTPs and dynamically load encrypted modules while evading OS notifications.",
+            behavior_summary="The application operates as an unauthorized mobile malware payload. It registers high-privilege OS listeners to silently intercept transactional SMS communications, evade user notifications, and dynamically load obfuscated modules from remote infrastructure.",
             attack_chain=steps,
             iocs=IocGroup(
                 domains=["test-c2bank.info"] if "CryptoHelper.java" in [m.file_path for m in methods] else [],
@@ -295,14 +295,14 @@ Analyze the above bytecode evidence and static context. Reconstruct the end-to-e
                 package_names=[package_name] if package_name else [],
             ),
             mitre_techniques=[
-                MitreTechnique(id="T1412", name="SMS Interception / Theft", reason="Uses abortBroadcast to suppress and steal banking OTPs."),
+                MitreTechnique(id="T1412", name="SMS Interception / Theft", reason="Uses abortBroadcast to suppress and steal confidential messages."),
                 MitreTechnique(id="T1407", name="Dynamic Code Loading", reason="Invokes DexClassLoader to execute encrypted secondary classes."),
-                MitreTechnique(id="T1437", name="Application Layer Protocol", reason="Exfiltrates stolen credentials over HTTP POST to C2 IP."),
+                MitreTechnique(id="T1437", name="Application Layer Protocol", reason="Exfiltrates harvested device credentials over HTTP POST to C2 IP."),
             ] if (has_sms or has_dex) else [],
             recommendations=[
-                "Block SHA-256 hash at mobile device management (MDM) and email gateways.",
+                "Block SHA-256 hash across mobile device management (MDM) and email gateways.",
                 "Blacklist C2 infrastructure IPs at network perimeter firewalls.",
-                "Revoke banking session tokens for users exhibiting infection indicators.",
+                "Revoke active session tokens for devices exhibiting infection indicators.",
             ],
         )
 

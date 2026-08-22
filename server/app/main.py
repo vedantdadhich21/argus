@@ -16,8 +16,8 @@ from app.routers import scans
 settings = get_settings()
 
 app = FastAPI(
-    title="APK Sentinel",
-    description="Automated fraud-APK analysis platform — bank fraud prevention (SW-07)",
+    title="Argus",
+    description="Automated Mobile Threat Intelligence & Malware Reverse-Engineering Platform",
     version="1.0.0",
 )
 

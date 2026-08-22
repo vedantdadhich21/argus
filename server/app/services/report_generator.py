@@ -200,15 +200,15 @@ class ReportGenerator:
             md_lines.append("*No MITRE ATT&CK Mobile techniques correlated.*")
 
         # Recommended Actions
-        md_lines.append("\n## Recommended Actions for Bank SOC / Fraud Operations\n")
+        md_lines.append("\n## Recommended Incident Response & Mitigation Actions\n")
         if recommendations and len(recommendations) > 0:
             for rec in recommendations:
                 md_lines.append(f"- [ ] {rec}")
         else:
             md_lines.append("- [ ] Block the SHA-256 hash at enterprise perimeter email and SMS gateways.")
-            md_lines.append("- [ ] Correlate inbound customer login attempts from devices matching these IOCs.")
+            md_lines.append("- [ ] Correlate inbound authentication attempts from devices matching these IOCs.")
 
-        md_lines.append("\n---\n*Report generated automatically by APK Sentinel Fraud Analysis Engine.*")
+        md_lines.append("\n---\n*Report generated automatically by Argus Threat Intelligence Engine.*")
         return "\n".join(md_lines)
 
     def save_report(self, scan_id: str, markdown_content: str, output_dir: str = "storage/reports") -> str:

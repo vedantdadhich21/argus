@@ -37,9 +37,9 @@ export default function ApiDocs() {
     <div className="min-h-screen bg-slate-950 pt-20">
       <div className="mx-auto max-w-4xl px-6 py-10">
         <div className="mb-10">
-          <h1 className="text-2xl font-bold text-white">API Reference</h1>
+          <h1 className="text-2xl font-bold text-white">Argus Threat Intelligence API</h1>
           <p className="text-sm text-slate-400 mt-1">
-            Bank-gateway integration ready. Base URL: <code className="text-red-400">{BASE}</code> · No auth required.
+            Enterprise SIEM/SOAR and security gateway ready. Base URL: <code className="text-red-400">{BASE}</code> · No auth required.
           </p>
         </div>
 
@@ -55,7 +55,7 @@ curl -X POST ${BASE}/api/scan \\
 # Errors: 413 (too large) · 415 (not an APK) · 429 (server busy)`} />
           </Section>
 
-          <Section title="POST /api/lookup/hash" desc="Fast-path used by mobile clients. Hash the APK on-device, query before uploading. If known: instant verdict. If unknown: proceed to upload.">
+          <Section title="POST /api/lookup/hash" desc="Fast-path used by mobile clients and threat feeds. Hash the APK on-device or at gateway, query before uploading. If known: instant verdict. If unknown: proceed to upload.">
             <CodeBlock code={`# Hash lookup (instant cached verdict)
 curl -X POST ${BASE}/api/lookup/hash \\
   -H "Content-Type: application/json" \\
@@ -86,7 +86,7 @@ curl ${BASE}/api/scan/9f1c4e2a8b3d7f0c5e6a1b4d2c8f9e3a
   "triggers": [...],
   "ai_analysis": { "attack_chain": [...], "mitre_techniques": [...] },
   "report_markdown": "# Threat Report..."
-}`} />
+} `} />
           </Section>
 
           <Section title="GET /api/scan/{id}/report?format=md" desc="Download the full investigation report as a Markdown file.">
@@ -108,10 +108,10 @@ curl ${BASE}/api/scan/9f1c4e2a8b3d7f0c5e6a1b4d2c8f9e3a
 
           {/* Integration pitch */}
           <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-6">
-            <h3 className="text-base font-bold text-white mb-2">🏦 Gateway Integration Pattern</h3>
+            <h3 className="text-base font-bold text-white mb-2">🛡️ Enterprise Security Gateway Integration</h3>
             <p className="text-sm text-slate-400 mb-4">
-              The pair <code className="text-red-400">POST /api/lookup/hash</code> + <code className="text-red-400">POST /api/scan</code> is the complete bank-gateway integration story.
-              Hash check is instant (milliseconds). Full scan completes in under 40 seconds.
+              The pair <code className="text-red-400">POST /api/lookup/hash</code> + <code className="text-red-400">POST /api/scan</code> enables automated malware triage across mail gateways, MDMs, and endpoint agents.
+              Hash check is instant (milliseconds). Full decompilation + GenAI investigation completes in under 30 seconds.
             </p>
             <CodeBlock code={`# Step 1: Hash the APK (on-device or server-side)
 sha256=$(sha256sum suspicious.apk | awk '{print $1}')

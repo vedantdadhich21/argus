@@ -100,14 +100,14 @@ fun StandbyScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Sentinel Shield",
+            text = "Argus",
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold,
             color = TextPrimary
         )
 
         Text(
-            text = "Active Protection · Intercepting Malicious APKs",
+            text = "Active Protection · Advanced Mobile Threat Defense",
             fontSize = 13.sp,
             color = AccentGreen,
             modifier = Modifier.padding(top = 4.dp)
@@ -187,8 +187,8 @@ fun StandbyScreen(
                 Text(text = "How It Works", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "1. When you tap any APK in WhatsApp, Telegram, or Browser, Android suggests Sentinel Shield.\n" +
-                            "2. Sentinel Shield instantly queries the fraud engine by cryptographic hash.\n" +
+                    text = "1. When you tap any APK in WhatsApp, Telegram, or Browser, Android suggests Argus.\n" +
+                            "2. Argus instantly queries the threat intelligence engine by cryptographic hash.\n" +
                             "3. Unknown APKs are safely analyzed in real-time before install.",
                     fontSize = 12.sp,
                     lineHeight = 18.sp,
@@ -345,8 +345,8 @@ fun VerdictScreen(
     val isYellow = score in 40..74 || scan.severity.equals("HIGH", ignoreCase = true) || scan.severity.equals("MEDIUM", ignoreCase = true)
 
     val themeColor = if (isRed) AccentRed else if (isYellow) AccentYellow else AccentGreen
-    val verdictTitle = if (isRed) "CRITICAL FRAUD THREAT" else if (isYellow) "POTENTIAL RISK DETECTED" else "APPLICATION VERIFIED SAFE"
-    val verdictSubtitle = if (isRed) "Do NOT install this application. OTP theft or banking malware detected."
+    val verdictTitle = if (isRed) "CRITICAL MALWARE THREAT" else if (isYellow) "POTENTIAL RISK DETECTED" else "APPLICATION VERIFIED SAFE"
+    val verdictSubtitle = if (isRed) "Do NOT install this application. Malicious Trojan or spyware payload detected."
     else if (isYellow) "Application exhibits suspicious behaviors. Proceed with caution."
     else "No malicious signatures, Trojan payloads, or risky permissions detected."
 

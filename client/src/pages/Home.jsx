@@ -20,10 +20,10 @@ export default function Home() {
   const { data: history } = useScans(1, 5)
 
   const features = [
-    { icon: Zap,    title: 'Instant Hash Cache',  desc: 'Previously seen APKs return verdicts in milliseconds' },
-    { icon: Eye,    title: 'AI Attack Chain',      desc: 'LLM reconstructs the fraud story step-by-step' },
-    { icon: Lock,   title: 'Explainable Scoring',  desc: 'Every point traced to a triggered rule — no black box' },
-    { icon: Shield, title: 'Bank-Ready API',        desc: 'POST /api/lookup/hash is one integration away from your gateway' },
+    { icon: Zap,    title: 'Instant Hash Cache',       desc: 'Previously seen APKs return verified threat verdicts in milliseconds' },
+    { icon: Eye,    title: 'AI Attack Chain',           desc: 'LLM reconstructs the end-to-end malware kill chain step-by-step' },
+    { icon: Lock,   title: 'Explainable Scoring',       desc: 'Every risk point is mapped to MITRE ATT&CK and deterministic rules' },
+    { icon: Shield, title: 'Enterprise Defense API',   desc: 'REST API ready for SIEM, SOAR, MDM, and gateway integration' },
   ]
 
   return (
@@ -37,14 +37,14 @@ export default function Home() {
         <div className="relative mx-auto max-w-4xl px-6 py-20 text-center">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-400">
             <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-pulse" />
-            SW-07 · Bank Fraud Prevention · GenAI Powered
+            Next-Gen Mobile Threat Intelligence · GenAI Powered
           </div>
 
           <h1 className="mb-4 text-5xl font-black tracking-tight text-white leading-tight">
-            APK <span className="bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">Sentinel</span>
+            Argus
           </h1>
           <p className="mx-auto mb-10 max-w-xl text-lg text-slate-400">
-            Intelligence at the core, protection at the edge — one engine protecting both the bank analyst and the end customer.
+            Intelligence at the core, protection at the edge — one unified engine safeguarding security analysts and mobile users from advanced cyber threats.
           </p>
 
           {/* Stats strip */}
@@ -62,7 +62,7 @@ export default function Home() {
 
       {/* Features */}
       <section className="mx-auto max-w-4xl px-6 py-16">
-        <h2 className="text-center text-2xl font-bold text-white mb-10">Why APK Sentinel</h2>
+        <h2 className="text-center text-2xl font-bold text-white mb-10">Why Argus</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {features.map(({ icon: Icon, title, desc }) => (
             <div key={title} className="flex gap-4 rounded-xl border border-white/5 bg-white/[0.02] p-5 hover:border-white/10 transition-colors">
