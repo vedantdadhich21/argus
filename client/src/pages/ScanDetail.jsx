@@ -58,6 +58,11 @@ export default function ScanDetail() {
     URL.revokeObjectURL(url)
   }
 
+  const downloadPdf = async () => {
+    const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
+    window.open(`${API_BASE}/api/scan/${id}/report?format=pdf`, '_blank')
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 pt-20">
       <div className="mx-auto max-w-5xl px-6 py-10">
@@ -80,14 +85,23 @@ export default function ScanDetail() {
             </button>
           ))}
 
-          {/* Download btn */}
-          <button
-            onClick={downloadReport}
-            className="ml-auto flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white hover:border-white/20 transition-all mb-1"
-          >
-            <Download className="h-3.5 w-3.5" />
-            Download .md
-          </button>
+          {/* Download buttons */}
+          <div className="ml-auto flex items-center gap-2 mb-1">
+            <button
+              onClick={downloadReport}
+              className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-white hover:border-white/20 transition-all"
+            >
+              <Download className="h-3.5 w-3.5" />
+              .md
+            </button>
+            <button
+              onClick={downloadPdf}
+              className="flex items-center gap-1.5 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-300 hover:text-white hover:bg-red-500/20 transition-all"
+            >
+              <Download className="h-3.5 w-3.5" />
+              .pdf
+            </button>
+          </div>
         </div>
 
         {/* Tab content */}

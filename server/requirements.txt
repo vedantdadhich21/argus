@@ -7,4 +7,5 @@ httpx
 pyyaml
 androguard==3.3.5
 markdown2
+reportlab
 pytest

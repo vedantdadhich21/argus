@@ -194,10 +194,10 @@ def _build_completed_response(scan: Scan) -> ScanCompletedResponse:
 @router.get("/scan/{scan_id}/report", tags=["scan"])
 async def download_report(
     scan_id: str,
-    format: str = Query("md", pattern="^(md)$"),
+    format: str = Query("md", pattern="^(md|pdf)$"),
     db: Session = Depends(get_db),
 ):
-    """Download the markdown report for a completed scan."""
+    """Download the markdown or PDF threat report for a completed scan."""
     from fastapi.responses import Response
 
     scan = db.query(Scan).filter(Scan.id == scan_id).first()
@@ -207,6 +207,17 @@ async def download_report(
         raise HTTPException(status_code=400, detail="Scan is not yet completed.")
     if not scan.report_markdown:
         raise HTTPException(status_code=404, detail="Report not available for this scan.")
+
+    if format == "pdf":
+        from app.services.report_generator import ReportGenerator
+        generator = ReportGenerator()
+        pdf_bytes = generator.generate_pdf(scan.report_markdown)
+        filename = f"apk-sentinel-report-{scan_id[:8]}.pdf"
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+        )
 
     filename = f"apk-sentinel-report-{scan_id[:8]}.md"
     return Response(

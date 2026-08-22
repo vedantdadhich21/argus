@@ -1,0 +1,20 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.bank.security.update.fake_banker-mergeDebugResources-17:/values-hdpi-v4/values-hdpi-v4.xml",
+            "map": [
+                {
+                    "source": "/Users/vedantdadhich/.gradle/caches/9.5.0/transforms/432c44b23bb95eca9b1723f218cab523/transformed/appcompat-1.6.1/res/values-hdpi-v4/values-hdpi-v4.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "6",
+                        "endColumns": "13",
+                        "endOffsets": "327"
+                    }
+                }
+            ]
+        }
+    ]
+}

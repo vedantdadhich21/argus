@@ -220,6 +220,138 @@ class ReportGenerator:
             f.write(markdown_content)
         return str(report_file)
 
+    def generate_pdf(self, markdown_content: str) -> bytes:
+        """Converts generated Markdown report into a clean, presentation-ready PDF document."""
+        import io
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib import colors
+
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=letter,
+            rightMargin=40,
+            leftMargin=40,
+            topMargin=40,
+            bottomMargin=40,
+        )
+
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'ReportTitle',
+            parent=styles['Heading1'],
+            fontSize=18,
+            leading=22,
+            textColor=colors.HexColor('#0f172a'),
+            spaceAfter=8,
+        )
+        h2_style = ParagraphStyle(
+            'ReportH2',
+            parent=styles['Heading2'],
+            fontSize=13,
+            leading=16,
+            textColor=colors.HexColor('#1e293b'),
+            spaceBefore=12,
+            spaceAfter=6,
+        )
+        body_style = ParagraphStyle(
+            'ReportBody',
+            parent=styles['BodyText'],
+            fontSize=9,
+            leading=13,
+            textColor=colors.HexColor('#334155'),
+            spaceAfter=4,
+        )
+        bullet_style = ParagraphStyle(
+            'ReportBullet',
+            parent=styles['BodyText'],
+            fontSize=9,
+            leading=13,
+            textColor=colors.HexColor('#334155'),
+            leftIndent=15,
+            spaceAfter=3,
+        )
+
+        story = []
+        lines = markdown_content.split('\n')
+        in_table = False
+        table_rows = []
+
+        for line in lines:
+            stripped = line.strip()
+            if not stripped:
+                if in_table and table_rows:
+                    # Render table
+                    t = Table(table_rows, hAlign='LEFT')
+                    t.setStyle(TableStyle([
+                        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f1f5f9')),
+                        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1e293b')),
+                        ('FONTSIZE', (0, 0), (-1, -1), 8),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                        ('TOPPADDING', (0, 0), (-1, -1), 4),
+                        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1')),
+                    ]))
+                    story.append(t)
+                    story.append(Spacer(1, 8))
+                    table_rows = []
+                    in_table = False
+                continue
+
+            if stripped.startswith('|') and stripped.endswith('|'):
+                in_table = True
+                cols = [c.strip() for c in stripped.strip('|').split('|')]
+                if not all(set(c).issubset({'-', ':', ' '}) for c in cols):
+                    table_rows.append([Paragraph(c, body_style) for c in cols])
+                continue
+            elif in_table:
+                if table_rows:
+                    t = Table(table_rows, hAlign='LEFT')
+                    t.setStyle(TableStyle([
+                        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f1f5f9')),
+                        ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1e293b')),
+                        ('FONTSIZE', (0, 0), (-1, -1), 8),
+                        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                        ('TOPPADDING', (0, 0), (-1, -1), 4),
+                        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1')),
+                    ]))
+                    story.append(t)
+                    story.append(Spacer(1, 8))
+                table_rows = []
+                in_table = False
+
+            if stripped.startswith('# '):
+                story.append(Paragraph(stripped[2:], title_style))
+                story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#dc2626'), spaceAfter=10))
+            elif stripped.startswith('## '):
+                story.append(Paragraph(stripped[3:], h2_style))
+            elif stripped.startswith('### '):
+                story.append(Paragraph(stripped[4:], h2_style))
+            elif stripped.startswith('- ') or stripped.startswith('* '):
+                story.append(Paragraph("• " + stripped[2:], bullet_style))
+            elif stripped.startswith('---'):
+                story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#e2e8f0'), spaceAfter=8))
+            else:
+                story.append(Paragraph(stripped, body_style))
+
+        if in_table and table_rows:
+            t = Table(table_rows, hAlign='LEFT')
+            t.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f1f5f9')),
+                ('TEXTCOLOR', (0, 0), (-1, -1), colors.HexColor('#1e293b')),
+                ('FONTSIZE', (0, 0), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
+                ('TOPPADDING', (0, 0), (-1, -1), 4),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#cbd5e1')),
+            ]))
+            story.append(t)
+
+        doc.build(story)
+        pdf_bytes = buffer.getvalue()
+        buffer.close()
+        return pdf_bytes
+
 
 if __name__ == "__main__":
     import argparse

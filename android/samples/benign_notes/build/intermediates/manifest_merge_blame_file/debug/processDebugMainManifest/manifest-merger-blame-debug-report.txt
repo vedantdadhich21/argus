@@ -1,0 +1,86 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.example.simplenotes"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+7-->INJECTED
+8        android:minSdkVersion="26"
+8-->INJECTED
+9        android:targetSdkVersion="34" />
+9-->INJECTED
+10
+11    <!-- Normal benign permission -->
+12    <uses-permission android:name="android.permission.INTERNET" />
+12-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:6:5-67
+12-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:6:22-64
+13
+14    <permission
+14-->[androidx.core:core:1.9.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/4e7032cc908defb53f9ed5ad864a934d/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
+15        android:name="com.example.simplenotes.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+15-->[androidx.core:core:1.9.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/4e7032cc908defb53f9ed5ad864a934d/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
+16        android:protectionLevel="signature" />
+16-->[androidx.core:core:1.9.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/4e7032cc908defb53f9ed5ad864a934d/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
+17
+18    <uses-permission android:name="com.example.simplenotes.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+18-->[androidx.core:core:1.9.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/4e7032cc908defb53f9ed5ad864a934d/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
+18-->[androidx.core:core:1.9.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/4e7032cc908defb53f9ed5ad864a934d/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
+19
+20    <application
+20-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:8:5-22:19
+21        android:allowBackup="true"
+21-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:9:9-35
+22        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+22-->[androidx.core:core:1.9.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/4e7032cc908defb53f9ed5ad864a934d/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
+23        android:debuggable="true"
+24        android:extractNativeLibs="false"
+24-->INJECTED
+25        android:icon="@android:drawable/sym_def_app_icon"
+25-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:10:9-58
+26        android:label="Simple Notes"
+26-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:11:9-37
+27        android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
+27-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:12:9-65
+28        <activity
+28-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:14:9-21:20
+29            android:name="com.example.simplenotes.MainActivity"
+29-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:15:13-41
+30            android:exported="true" >
+30-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:16:13-36
+31            <intent-filter>
+31-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:17:13-20:29
+32                <action android:name="android.intent.action.MAIN" />
+32-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:18:17-69
+32-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:18:25-66
+33
+34                <category android:name="android.intent.category.LAUNCHER" />
+34-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:19:17-77
+34-->/Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/AndroidManifest.xml:19:27-74
+35            </intent-filter>
+36        </activity>
+37
+38        <provider
+38-->[androidx.emoji2:emoji2:1.2.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/a3d07d3713ca6c444f8a2eaabd2fadcd/transformed/emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+39            android:name="androidx.startup.InitializationProvider"
+39-->[androidx.emoji2:emoji2:1.2.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/a3d07d3713ca6c444f8a2eaabd2fadcd/transformed/emoji2-1.2.0/AndroidManifest.xml:25:13-67
+40            android:authorities="com.example.simplenotes.androidx-startup"
+40-->[androidx.emoji2:emoji2:1.2.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/a3d07d3713ca6c444f8a2eaabd2fadcd/transformed/emoji2-1.2.0/AndroidManifest.xml:26:13-68
+41            android:exported="false" >
+41-->[androidx.emoji2:emoji2:1.2.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/a3d07d3713ca6c444f8a2eaabd2fadcd/transformed/emoji2-1.2.0/AndroidManifest.xml:27:13-37
+42            <meta-data
+42-->[androidx.emoji2:emoji2:1.2.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/a3d07d3713ca6c444f8a2eaabd2fadcd/transformed/emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+43                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+43-->[androidx.emoji2:emoji2:1.2.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/a3d07d3713ca6c444f8a2eaabd2fadcd/transformed/emoji2-1.2.0/AndroidManifest.xml:30:17-75
+44                android:value="androidx.startup" />
+44-->[androidx.emoji2:emoji2:1.2.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/a3d07d3713ca6c444f8a2eaabd2fadcd/transformed/emoji2-1.2.0/AndroidManifest.xml:31:17-49
+45            <meta-data
+45-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/b5c69c3150ede4bc7cdeb4a1095e9128/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
+46                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+46-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/b5c69c3150ede4bc7cdeb4a1095e9128/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
+47                android:value="androidx.startup" />
+47-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/b5c69c3150ede4bc7cdeb4a1095e9128/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
+48        </provider>
+49    </application>
+50
+51</manifest>

@@ -24,3 +24,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "Sentinel Shield"
 include(":app")
+include(":samples:fake_banker")
+project(":samples:fake_banker").projectDir = file("samples/fake_banker")
+include(":samples:benign_notes")
+project(":samples:benign_notes").projectDir = file("samples/benign_notes")

@@ -9,8 +9,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # Choose APK sample for testing
-if [ -f "$REPO_ROOT/samples/fake_banker.apk" ]; then
-    SAMPLE_APK="$REPO_ROOT/samples/fake_banker.apk"
+if [ -f "$REPO_ROOT/server/samples/fake_banker.apk" ]; then
+    SAMPLE_APK="$REPO_ROOT/server/samples/fake_banker.apk"
 elif [ -f "$REPO_ROOT/android/app/build/intermediates/apk/debug/app-debug.apk" ]; then
     SAMPLE_APK="$REPO_ROOT/android/app/build/intermediates/apk/debug/app-debug.apk"
 else
@@ -26,7 +26,7 @@ echo "========================================================"
 echo ""
 
 # 1. Health check
-echo -n "[1/8] Testing GET /health ... "
+echo -n "[1/9] Testing GET /health ... "
 HEALTH_RESP=$(curl -s -f "$BASE_URL/health" || echo "FAILED")
 if [[ "$HEALTH_RESP" == *"\"status\":\"ok\""* ]] || [[ "$HEALTH_RESP" == *"\"status\": \"ok\""* ]]; then
     echo "✅ PASS"
@@ -36,7 +36,7 @@ else
 fi
 
 # 2. Stats
-echo -n "[2/8] Testing GET /api/stats ... "
+echo -n "[2/9] Testing GET /api/stats ... "
 STATS_RESP=$(curl -s -f "$BASE_URL/api/stats" || echo "FAILED")
 if [[ "$STATS_RESP" == *"total_scans"* ]]; then
     echo "✅ PASS"
@@ -46,7 +46,7 @@ else
 fi
 
 # 3. Upload APK
-echo -n "[3/8] Testing POST /api/scan (upload) ... "
+echo -n "[3/9] Testing POST /api/scan (upload) ... "
 UPLOAD_RESP=$(curl -s -f -X POST "$BASE_URL/api/scan" -F "file=@$SAMPLE_APK" || echo "FAILED")
 SCAN_ID=$(echo "$UPLOAD_RESP" | python3 -c "import sys, json; print(json.load(sys.stdin).get('scan_id', ''))" 2>/dev/null || echo "")
 
@@ -58,7 +58,7 @@ else
 fi
 
 # 4. Poll scan status until completion
-echo -n "[4/8] Polling GET /api/scan/$SCAN_ID until completion ... "
+echo -n "[4/9] Polling GET /api/scan/$SCAN_ID until completion ... "
 MAX_ATTEMPTS=35
 STATUS="unknown"
 
@@ -82,7 +82,7 @@ else
 fi
 
 # 5. Hash lookup fast-path
-echo -n "[5/8] Testing POST /api/lookup/hash ... "
+echo -n "[5/9] Testing POST /api/lookup/hash ... "
 SHA256=$(shasum -a 256 "$SAMPLE_APK" | awk '{print $1}')
 LOOKUP_RESP=$(curl -s -f -X POST "$BASE_URL/api/lookup/hash" \
     -H "Content-Type: application/json" \
@@ -98,7 +98,7 @@ else
 fi
 
 # 6. Scans history
-echo -n "[6/8] Testing GET /api/scans ... "
+echo -n "[6/9] Testing GET /api/scans ... "
 SCANS_RESP=$(curl -s -f "$BASE_URL/api/scans?limit=5" || echo "FAILED")
 TOTAL=$(echo "$SCANS_RESP" | python3 -c "import sys, json; print(json.load(sys.stdin).get('total', 0))" 2>/dev/null || echo "0")
 
@@ -109,9 +109,9 @@ else
     exit 1
 fi
 
-# 7. Download report
-echo -n "[7/8] Testing GET /api/scan/$SCAN_ID/report ... "
-REPORT_RESP=$(curl -s -f "$BASE_URL/api/scan/$SCAN_ID/report" || echo "FAILED")
+# 7. Download report (Markdown and PDF)
+echo -n "[7/9] Testing GET /api/scan/$SCAN_ID/report?format=md ... "
+REPORT_RESP=$(curl -s -f "$BASE_URL/api/scan/$SCAN_ID/report?format=md" || echo "FAILED")
 
 if [[ "$REPORT_RESP" == *"# Threat Investigation Report"* ]]; then
     echo "✅ PASS (report length=${#REPORT_RESP} bytes)"
@@ -120,8 +120,17 @@ else
     exit 1
 fi
 
-# 8. Error handling checks
-echo -n "[8/8] Testing 415 rejection for non-APK upload ... "
+echo -n "[8/9] Testing GET /api/scan/$SCAN_ID/report?format=pdf ... "
+PDF_RESP=$(curl -s -f "$BASE_URL/api/scan/$SCAN_ID/report?format=pdf" || echo "FAILED")
+if [[ "$PDF_RESP" == "%PDF"* ]]; then
+    echo "✅ PASS (valid PDF header, size=${#PDF_RESP} bytes)"
+else
+    echo "❌ FAIL (invalid PDF content)"
+    exit 1
+fi
+
+# 9. Error handling checks
+echo -n "[9/9] Testing 415 rejection for non-APK upload ... "
 TMP_FILE=$(mktemp /tmp/test_invalid.txt)
 echo "not an apk" > "$TMP_FILE"
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$BASE_URL/api/scan" -F "file=@$TMP_FILE" || echo "000")
@@ -136,5 +145,5 @@ fi
 
 echo ""
 echo "========================================================"
-echo "🎉 ALL 8 SMOKE TESTS PASSED END-TO-END!"
+echo "🎉 ALL 9 SMOKE TESTS PASSED END-TO-END!"
 echo "========================================================"

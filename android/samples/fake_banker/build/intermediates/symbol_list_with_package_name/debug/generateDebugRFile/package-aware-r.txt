@@ -1,0 +1,4 @@
+com.bank.security.update
+string app_name
+string backup_c2
+string c2_endpoint

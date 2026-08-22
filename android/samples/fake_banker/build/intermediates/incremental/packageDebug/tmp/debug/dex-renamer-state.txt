@@ -1,0 +1,13 @@
+#Sat Aug 22 16:27:17 IST 2026
+base.0=/Users/vedantdadhich/repos/argus/android/samples/fake_banker/build/intermediates/dex/debug/mergeExtDexDebug/classes.dex
+base.1=/Users/vedantdadhich/repos/argus/android/samples/fake_banker/build/intermediates/dex/debug/mergeProjectDexDebug/0/classes.dex
+base.2=/Users/vedantdadhich/repos/argus/android/samples/fake_banker/build/intermediates/dex/debug/mergeProjectDexDebug/7/classes.dex
+base.3=/Users/vedantdadhich/repos/argus/android/samples/fake_banker/build/intermediates/global_synthetics_dex/debug/generateDebugGlobalSynthetics/classes.dex
+path.0=classes.dex
+path.1=0/classes.dex
+path.2=7/classes.dex
+path.3=classes.dex
+renamed.0=classes.dex
+renamed.1=classes2.dex
+renamed.2=classes3.dex
+renamed.3=classes4.dex

@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.bank.security.update.fake_banker-mergeDebugResources-17:/values-h720dp-v13/values-h720dp-v13.xml",
+            "map": [
+                {
+                    "source": "/Users/vedantdadhich/.gradle/caches/9.5.0/transforms/432c44b23bb95eca9b1723f218cab523/transformed/appcompat-1.6.1/res/values-h720dp-v13/values-h720dp-v13.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "66",
+                        "endOffsets": "117"
+                    }
+                }
+            ]
+        }
+    ]
+}

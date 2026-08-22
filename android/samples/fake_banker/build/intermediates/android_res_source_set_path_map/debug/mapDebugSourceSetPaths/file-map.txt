@@ -1,0 +1,8 @@
+com.bank.security.update.fake_banker-pngs-0 /Users/vedantdadhich/repos/argus/android/samples/fake_banker/build/generated/res/pngs/debug
+com.bank.security.update.fake_banker-updated_navigation_xml-1 /Users/vedantdadhich/repos/argus/android/samples/fake_banker/build/generated/updated_navigation_xml/debug
+com.bank.security.update.fake_banker-packageDebugResources-2 /Users/vedantdadhich/repos/argus/android/samples/fake_banker/build/intermediates/incremental/debug/packageDebugResources/merged.dir
+com.bank.security.update.fake_banker-packageDebugResources-3 /Users/vedantdadhich/repos/argus/android/samples/fake_banker/build/intermediates/incremental/debug/packageDebugResources/stripped.dir
+com.bank.security.update.fake_banker-debug-4 /Users/vedantdadhich/repos/argus/android/samples/fake_banker/build/intermediates/merged_res/debug/mergeDebugResources
+com.bank.security.update.fake_banker-debug-5 /Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/debug/res
+com.bank.security.update.fake_banker-main-6 /Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/res
+gradleHome-0 /Users/vedantdadhich/.gradle

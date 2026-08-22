@@ -133,9 +133,14 @@ def _collect_sources(scan_id: str, apk_path: str) -> List[tuple]:
         except Exception:
             pass
 
-    # 3. Decompiled .java source files (batch read, size-capped)
+    # 3. Decompiled .java source files (app code prioritized, framework excluded)
+    framework_excludes = ("androidx/", "android/support/", "kotlin/", "kotlinx/", "com/google/android/material/")
     java_files = get_java_files(scan_id)
-    for java_path in java_files[:200]:  # cap at 200 files
+    app_java_files = [
+        f for f in java_files
+        if not any(f.replace("\\", "/").endswith(ex) or f"/{ex}" in f.replace("\\", "/") for ex in framework_excludes)
+    ]
+    for java_path in (app_java_files or java_files)[:200]:  # fallback to all if app_java_files empty
         try:
             if os.path.getsize(java_path) > 500_000:
                 continue

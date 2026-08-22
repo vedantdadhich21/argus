@@ -224,11 +224,14 @@ class MethodSelector:
         if not base_path.exists():
             return []
 
+        framework_excludes = ("androidx/", "android/support/", "kotlin/", "kotlinx/", "com/google/android/material/")
         for root, _, files in os.walk(base_path):
             for file in files:
                 if file.endswith(".java") or file.endswith(".smali") or file.endswith(".kt"):
                     abs_file = os.path.join(root, file)
-                    rel_file = os.path.relpath(abs_file, base_dir)
+                    rel_file = os.path.relpath(abs_file, base_dir).replace("\\", "/")
+                    if any(rel_file.startswith(ex) or f"/{ex}" in rel_file for ex in framework_excludes):
+                        continue
                     try:
                         with open(abs_file, "r", encoding="utf-8", errors="ignore") as f:
                             content = f.read()

@@ -19,6 +19,11 @@ _MAX_FILE_BYTES = 2 * 1024 * 1024  # 2 MB
 _MAX_HITS_PER_RULE = 5
 
 
+_FRAMEWORK_EXCLUDES = (
+    "androidx/", "android/support/", "kotlin/", "kotlinx/",
+    "com/google/android/material/", "org/intellij/", "org/jetbrains/"
+)
+
 def scan(scan_id: str, code_rules: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     Scan all decompiled .java files for code_rules patterns.
@@ -53,6 +58,13 @@ def scan(scan_id: str, code_rules: List[Dict[str, Any]]) -> List[Dict[str, Any]]
     seen: Dict[str, int] = {}  # rule_id -> count
 
     for java_path in java_files:
+        norm_path = java_path.replace("\\", "/").lower()
+        if any(f"/{ex}" in norm_path or f"\\{ex}" in norm_path or norm_path.startswith(ex) for ex in _FRAMEWORK_EXCLUDES):
+            continue
+
+        # Relative path for cleaner evidence strings
+        rel_path = _relative_path(java_path).replace("\\", "/")
+
         # Skip oversized files
         try:
             if os.path.getsize(java_path) > _MAX_FILE_BYTES:

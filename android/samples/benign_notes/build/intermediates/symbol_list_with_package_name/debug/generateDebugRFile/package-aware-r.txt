@@ -1,0 +1,2 @@
+com.example.simplenotes
+string app_name

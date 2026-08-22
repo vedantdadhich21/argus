@@ -241,12 +241,17 @@ def _check_embedded_payloads(a) -> Dict[str, bool]:
         files = a.get_files() or []
         for f in files:
             fl = f.lower()
-            if fl.endswith(".apk"):
+            # Root classes*.dex is standard compiled bytecode, not nested payload
+            is_in_payload_dir = fl.startswith("assets/") or fl.startswith("res/")
+            if is_in_payload_dir:
+                if fl.endswith(".apk"):
+                    result["nested_apk"] = True
+                elif fl.endswith(".dex"):
+                    result["nested_dex"] = True
+                elif fl.endswith(".so") or fl.endswith(".elf"):
+                    result["nested_elf"] = True
+            elif fl.endswith(".apk") and not fl.startswith("classes"):
                 result["nested_apk"] = True
-            elif fl.endswith(".dex"):
-                result["nested_dex"] = True
-            elif fl.endswith(".so"):
-                result["nested_elf"] = True
     except Exception:
         pass
     return result

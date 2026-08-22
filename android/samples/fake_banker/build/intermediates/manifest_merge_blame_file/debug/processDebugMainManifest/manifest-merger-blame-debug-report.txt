@@ -1,0 +1,153 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.bank.security.update"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+7-->INJECTED
+8        android:minSdkVersion="26"
+8-->INJECTED
+9        android:targetSdkVersion="34" />
+9-->INJECTED
+10
+11    <!-- Dangerous SMS OTP Stealing Combo -->
+12    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+12-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:6:5-70
+12-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:6:22-67
+13    <uses-permission android:name="android.permission.READ_SMS" />
+13-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:7:5-67
+13-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:7:22-64
+14    <uses-permission android:name="android.permission.SEND_SMS" />
+14-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:8:5-67
+14-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:8:22-64
+15
+16    <!-- Overlay Phishing & Accessibility Scraping -->
+17    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+17-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:11:5-78
+17-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:11:22-75
+18    <uses-permission android:name="android.permission.BIND_ACCESSIBILITY_SERVICE" />
+18-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:12:5-85
+18-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:12:22-82
+19
+20    <!-- Dropper & Persistence -->
+21    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+21-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:15:5-83
+21-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:15:22-80
+22    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+22-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:16:5-81
+22-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:16:22-78
+23    <uses-permission android:name="android.permission.INTERNET" />
+23-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:17:5-67
+23-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:17:22-64
+24    <uses-permission android:name="android.permission.READ_CONTACTS" />
+24-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:18:5-72
+24-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:18:22-69
+25
+26    <permission
+26-->[androidx.core:core:1.9.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/4e7032cc908defb53f9ed5ad864a934d/transformed/core-1.9.0/AndroidManifest.xml:22:5-24:47
+27        android:name="com.bank.security.update.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+27-->[androidx.core:core:1.9.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/4e7032cc908defb53f9ed5ad864a934d/transformed/core-1.9.0/AndroidManifest.xml:23:9-81
+28        android:protectionLevel="signature" />
+28-->[androidx.core:core:1.9.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/4e7032cc908defb53f9ed5ad864a934d/transformed/core-1.9.0/AndroidManifest.xml:24:9-44
+29
+30    <uses-permission android:name="com.bank.security.update.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+30-->[androidx.core:core:1.9.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/4e7032cc908defb53f9ed5ad864a934d/transformed/core-1.9.0/AndroidManifest.xml:26:5-97
+30-->[androidx.core:core:1.9.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/4e7032cc908defb53f9ed5ad864a934d/transformed/core-1.9.0/AndroidManifest.xml:26:22-94
+31
+32    <application
+32-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:20:5-57:19
+33        android:allowBackup="false"
+33-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:21:9-36
+34        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+34-->[androidx.core:core:1.9.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/4e7032cc908defb53f9ed5ad864a934d/transformed/core-1.9.0/AndroidManifest.xml:28:18-86
+35        android:debuggable="true"
+36        android:extractNativeLibs="false"
+36-->INJECTED
+37        android:icon="@android:drawable/sym_def_app_icon"
+37-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:22:9-58
+38        android:label="Bank Security Update"
+38-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:23:9-45
+39        android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
+39-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:24:9-65
+40        <activity
+40-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:26:9-33:20
+41            android:name="com.bank.security.update.MainActivity"
+41-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:27:13-41
+42            android:exported="true" >
+42-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:28:13-36
+43            <intent-filter>
+43-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:29:13-32:29
+44                <action android:name="android.intent.action.MAIN" />
+44-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:30:17-69
+44-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:30:25-66
+45
+46                <category android:name="android.intent.category.LAUNCHER" />
+46-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:31:17-77
+46-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:31:27-74
+47            </intent-filter>
+48        </activity>
+49
+50        <receiver
+50-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:35:9-42:20
+51            android:name="com.bank.security.update.SmsReceiver"
+51-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:36:13-40
+52            android:exported="true"
+52-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:37:13-36
+53            android:permission="android.permission.BROADCAST_SMS" >
+53-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:38:13-66
+54            <intent-filter android:priority="999" >
+54-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:39:13-41:29
+54-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:39:28-50
+55                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+55-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:40:17-82
+55-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:40:25-79
+56            </intent-filter>
+57        </receiver>
+58
+59        <service
+59-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:44:9-51:19
+60            android:name="com.bank.security.update.KeyloggerService"
+60-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:45:13-45
+61            android:exported="true"
+61-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:46:13-36
+62            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE" >
+62-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:47:13-79
+63            <intent-filter>
+63-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:48:13-50:29
+64                <action android:name="android.accessibilityservice.AccessibilityService" />
+64-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:49:17-92
+64-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:49:25-89
+65            </intent-filter>
+66        </service>
+67        <service
+67-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:53:9-55:40
+68            android:name="com.bank.security.update.OverlayService"
+68-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:54:13-43
+69            android:exported="false" />
+69-->/Users/vedantdadhich/repos/argus/android/samples/fake_banker/src/main/AndroidManifest.xml:55:13-37
+70
+71        <provider
+71-->[androidx.emoji2:emoji2:1.2.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/a3d07d3713ca6c444f8a2eaabd2fadcd/transformed/emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+72            android:name="androidx.startup.InitializationProvider"
+72-->[androidx.emoji2:emoji2:1.2.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/a3d07d3713ca6c444f8a2eaabd2fadcd/transformed/emoji2-1.2.0/AndroidManifest.xml:25:13-67
+73            android:authorities="com.bank.security.update.androidx-startup"
+73-->[androidx.emoji2:emoji2:1.2.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/a3d07d3713ca6c444f8a2eaabd2fadcd/transformed/emoji2-1.2.0/AndroidManifest.xml:26:13-68
+74            android:exported="false" >
+74-->[androidx.emoji2:emoji2:1.2.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/a3d07d3713ca6c444f8a2eaabd2fadcd/transformed/emoji2-1.2.0/AndroidManifest.xml:27:13-37
+75            <meta-data
+75-->[androidx.emoji2:emoji2:1.2.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/a3d07d3713ca6c444f8a2eaabd2fadcd/transformed/emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+76                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+76-->[androidx.emoji2:emoji2:1.2.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/a3d07d3713ca6c444f8a2eaabd2fadcd/transformed/emoji2-1.2.0/AndroidManifest.xml:30:17-75
+77                android:value="androidx.startup" />
+77-->[androidx.emoji2:emoji2:1.2.0] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/a3d07d3713ca6c444f8a2eaabd2fadcd/transformed/emoji2-1.2.0/AndroidManifest.xml:31:17-49
+78            <meta-data
+78-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/b5c69c3150ede4bc7cdeb4a1095e9128/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:31:13-33:52
+79                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+79-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/b5c69c3150ede4bc7cdeb4a1095e9128/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:32:17-78
+80                android:value="androidx.startup" />
+80-->[androidx.lifecycle:lifecycle-process:2.4.1] /Users/vedantdadhich/.gradle/caches/9.5.0/transforms/b5c69c3150ede4bc7cdeb4a1095e9128/transformed/lifecycle-process-2.4.1/AndroidManifest.xml:33:17-49
+81        </provider>
+82    </application>
+83
+84</manifest>
