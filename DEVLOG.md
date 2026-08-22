@@ -16,7 +16,45 @@ Rule: before starting any work, read the last 2–3 entries. After finishing a w
 
 Keep entries ≤ 15 lines. Link to commits where useful. Checkpoint merges (CP1/CP2) get an entry from every owner.
 
----
+### [2026-08-23 · Docker & Deployment Readiness] Vedant — docker-deployment
+- Did: Updated `server/Dockerfile`, `server/.env.example`, and `client/.env.example` for zero-friction cloud deployment.
+- How: Changed `server/Dockerfile` CMD to shell format (`sh -c uvicorn ... --port ${PORT:-8000}`) to dynamically honor cloud platform `$PORT` bindings (Railway/Render/Cloud Run). Standardized default SQLite path to `./storage/sentinel.db` so data persists with attached volumes. Clarified CORS and API baseURL configs across `.env.example` templates.
+- Gotchas: Cloud providers assigning non-8000 ports now boot without failing health checks.
+- Next: Ready for manual deployment to cloud hosting (Railway/Render/Vercel).
+
+### [2026-08-23 · Android Polling Resilience] Vedant — android-client
+- Did: Enhanced `MainActivity.kt` polling loop and `SentinelClient.kt` error handling to eliminate premature timeouts and transient network aborts.
+- How: Extended poll window to 60 attempts (up to 120s) for deep jadx decompilation + GenAI analysis; separated transient `network_error` from terminal pipeline failures (`failed`), tolerating momentary network glitches without aborting to the Standby home screen.
+- Gotchas: APKs undergoing first-time deep analysis now stay on the Scanning screen until completion rather than timing out back to Standby.
+- Next: Ready for live demonstration.
+
+### [2026-08-23 · Android UI Redesign] Vedant — android-ui-redesign
+
+- Did: Updated `android/app/src/main/java/com/sentinel/shield/ui/Screens.kt` (`StandbyScreen`, `ScanningScreen`, `VerdictScreen`) to match the Argus monochrome zinc design system.
+- How: Replaced emoji icons with sleek status badges, dot indicators, and left accent borders; migrated palette tokens to `#08080A` (background), `#111113` (cards), and `#27272A` (borders); aligned typography with monospace threat telemetry and severity tags matching the web dashboard.
+- Gotchas: Jetpack Compose previews and activity layouts are completely in sync with the web UI aesthetic.
+- Next: Final demo rehearsals and end-to-end verification.
+
+### [2026-08-23 · Detection Engine Harmonization] Vedant — server-rules-engine
+
+- Did: Enhanced `rules_engine.py` scoring logic with multi-signal synergy & accessibility self-sufficiency; updated `ScoreBreakdown.jsx` to accurately tally `effective_weight`.
+- How: Added `CODE_ACCESSIBILITY_CAPTURE` to self-sufficient rules (screen scraping is inherently malicious); added multi-pattern synergy detection: when 3+ distinct offensive code rules trigger (e.g. Accessibility + Keylogger + Clipboard), the 30% damping factor is lifted automatically, preventing evasive malware from falsely scoring LOW.
+- Gotchas: Restarting the FastAPI server or uploading fresh samples will now score spyware with 45–60 (HIGH) matching the AI kill chain narrative.
+- Next: All components aligned and tested.
+
+### [2026-08-23 · UI Scale & Visual Polish] Vedant — client-ui-redesign
+
+- Did: Fixed `RiskGauge.jsx` SVG arc math/stroke artifacts; scaled up UI by 1.2x across the app (`max-w-5xl` container, larger typography, `Dropzone.jsx`, `VerdictCard.jsx`, `ScoreBreakdown.jsx`, `Navbar.jsx`); restyled `AiFindings.jsx`, `AttackChain.jsx`, `MitreList.jsx`, `PermissionTable.jsx`, and `IocTable.jsx` to the Linear zinc aesthetic; added subtle cyber threat radar SVG accent, ambient glow, and micro-grid pattern to `Home.jsx`.
+- How: Converted gauge to explicit top-half SVG arc with SVG linear gradient and glow filter; expanded base font sizes and generous layout widths to eliminate empty column feel; converted AI findings, MITRE techniques, and IOCs from old colorful AI cards to unified monochrome surfaces with copy feedback and clear typography hierarchy.
+- Gotchas: Vite dev server Hot Module Reload picks up all changes cleanly at `http://localhost:5173`.
+- Next: Ready for end-to-end user testing or production build.
+
+### [2026-08-23 · UI Redesign] Vedant — client-ui-redesign
+- Did: Full UI redesign — `index.css`, `Navbar.jsx`, `SeverityBadge.jsx`, `Dropzone.jsx`, `VerdictCard.jsx`, `PipelineStatus.jsx`, `ScoreBreakdown.jsx`, `Home.jsx`, `History.jsx`, `ScanDetail.jsx`
+- How: Linear.app aesthetic — zinc-950/111113 dark, Inter font (Google Fonts import), monospace via JetBrains Mono for all data/hashes. Severity colors (red/orange/yellow/blue/green) only appear contextually — never as chrome decoration. Navbar is wordmark-only (`Argus · Sentinel`), no icon. Dropzone is flat dashed box. SeverityBadge is a dot + label pill (no emoji). History and Home use borderless row lists not cards. VerdictCard has left colored border-strip instead of a full colored background. PipelineStatus is now a compact vertical dot list, hidden when scan is complete.
+- Gotchas: The `replace_file_content` tool targets the original content for the StartLine-EndLine range. When you replace a large chunk, old content can be left below the new insertion because the match targets the *original* file text, not the resulting file. Check tail of each file after edits and strip duplicates manually. Run `view_file` on every file after editing to confirm no orphan blocks.
+- Next: The `RiskGauge` SVG still uses `Inter` font — can switch `fontFamily` to `var(--font-mono)` if desired. `AiFindings`, `AttackChain`, `MitreList`, `PermissionTable`, `IocTable` were not restyled — they will inherit the new CSS tokens from index.css (zinc backgrounds will apply) but their internal Tailwind classes still reference `slate-*`. Those components could be updated in a follow-up pass for full visual consistency.
+
 
 ## Entries
 

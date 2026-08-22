@@ -8,6 +8,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +33,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -57,15 +57,18 @@ import com.sentinel.shield.api.ScanDetailResponse
 import com.sentinel.shield.api.ScanHistoryItem
 import com.sentinel.shield.api.TriggerItem
 
-// Palette tokens
-val DarkBackground = Color(0xFF030712)
-val CardBackground = Color(0xFF111827)
-val CardBorder = Color(0xFF1F2937)
-val AccentRed = Color(0xFFEF4444)
-val AccentYellow = Color(0xFFF59E0B)
-val AccentGreen = Color(0xFF10B981)
-val TextPrimary = Color(0xFFF9FAFB)
-val TextSecondary = Color(0xFF9CA3AF)
+// Palette tokens matching Argus Linear Web Dashboard
+val DarkBackground = Color(0xFF08080A)
+val CardBackground = Color(0xFF111113)
+val CardBorder     = Color(0xFF27272A)
+val AccentRed      = Color(0xFFEF4444)
+val AccentOrange   = Color(0xFFF97316)
+val AccentYellow   = Color(0xFFEAB308)
+val AccentSky      = Color(0xFF38BDF8)
+val AccentGreen    = Color(0xFF22C55E)
+val TextPrimary    = Color(0xFFFAFAFA)
+val TextSecondary  = Color(0xFFA1A1AA)
+val TextMuted      = Color(0xFF71717A)
 
 @Composable
 fun StandbyScreen(
@@ -83,33 +86,48 @@ fun StandbyScreen(
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
-        // Shield Status Icon
-        Box(
+        // Argus Emblem Badge
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
             modifier = Modifier
-                .size(96.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF064E3B).copy(alpha = 0.5f))
-                .border(2.dp, AccentGreen, CircleShape),
-            contentAlignment = Alignment.Center
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color(0x1422C55E))
+                .border(BorderStroke(1.dp, Color(0x3322C55E)), RoundedCornerShape(20.dp))
+                .padding(horizontal = 14.dp, vertical = 6.dp)
         ) {
-            Text(text = "🛡️", fontSize = 42.sp)
+            Box(
+                modifier = Modifier
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(AccentGreen)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "EDGE INTERCEPTOR ACTIVE",
+                fontSize = 11.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.SemiBold,
+                color = AccentGreen
+            )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
         Text(
-            text = "Argus",
-            fontSize = 26.sp,
+            text = "Argus Mobile MTD",
+            fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = TextPrimary
+            color = TextPrimary,
+            letterSpacing = (-0.5).sp
         )
 
         Text(
-            text = "Active Protection · Advanced Mobile Threat Defense",
+            text = "GenAI Threat Defense & Sideload Interception",
             fontSize = 13.sp,
-            color = AccentGreen,
+            color = TextSecondary,
             modifier = Modifier.padding(top = 4.dp)
         )
 
@@ -119,8 +137,8 @@ fun StandbyScreen(
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = CardBackground),
-            shape = RoundedCornerShape(16.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, CardBorder)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Row(
@@ -128,11 +146,18 @@ fun StandbyScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = "Backend Server Engine", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
                     Text(
-                        text = if (isEditingServer) "Done" else "Change",
+                        text = "THREAT INTEL ENGINE",
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextMuted
+                    )
+                    Text(
+                        text = if (isEditingServer) "Done" else "Configure",
                         fontSize = 12.sp,
-                        color = Color(0xFF60A5FA),
+                        fontWeight = FontWeight.Medium,
+                        color = AccentSky,
                         modifier = Modifier.padding(4.dp)
                     )
                 }
@@ -148,8 +173,10 @@ fun StandbyScreen(
                         colors = TextFieldDefaults.colors(
                             focusedTextColor = TextPrimary,
                             unfocusedTextColor = TextPrimary,
-                            focusedContainerColor = Color(0xFF1F2937),
-                            unfocusedContainerColor = Color(0xFF1F2937)
+                            focusedContainerColor = Color(0xFF18181B),
+                            unfocusedContainerColor = Color(0xFF18181B),
+                            focusedIndicatorColor = AccentSky,
+                            unfocusedIndicatorColor = CardBorder
                         )
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -159,37 +186,44 @@ fun StandbyScreen(
                             isEditingServer = false
                         },
                         modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2563EB))
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF27272A)),
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("Save Engine URL", color = TextPrimary)
+                        Text("Save Engine Endpoint", color = TextPrimary, fontSize = 13.sp)
                     }
                 } else {
                     Text(
                         text = currentServerUrl,
                         fontSize = 13.sp,
                         fontFamily = FontFamily.Monospace,
-                        color = TextSecondary
+                        color = TextPrimary
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Instructions Card
         Card(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(containerColor = CardBackground),
-            shape = RoundedCornerShape(16.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, CardBorder)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = "How It Works", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
+                Text(
+                    text = "AUTOMATIC INTERCEPTION",
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextMuted
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "1. When you tap any APK in WhatsApp, Telegram, or Browser, Android suggests Argus.\n" +
-                            "2. Argus instantly queries the threat intelligence engine by cryptographic hash.\n" +
-                            "3. Unknown APKs are safely analyzed in real-time before install.",
+                    text = "1. Opening any APK via WhatsApp, Telegram, or Browser routes through Argus.\n" +
+                            "2. SHA-256 hash verified instantly against known threat cache.\n" +
+                            "3. Unknown samples decompiled and analyzed by GenAI in <15s.",
                     fontSize = 12.sp,
                     lineHeight = 18.sp,
                     color = TextSecondary
@@ -197,12 +231,24 @@ fun StandbyScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         // Recent Scans
         if (history.isNotEmpty()) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-                Text(text = "Recent Interceptions", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "RECENT TELEMETRY",
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextMuted
+                )
+                Text(
+                    text = "${history.size} Scans",
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    color = TextMuted
+                )
             }
             Spacer(modifier = Modifier.height(8.dp))
             LazyColumn(
@@ -210,38 +256,66 @@ fun StandbyScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(history) { item ->
+                    val badgeColor = when (item.severity.uppercase()) {
+                        "CRITICAL" -> AccentRed
+                        "HIGH"     -> AccentOrange
+                        "MEDIUM"   -> AccentYellow
+                        "LOW"      -> AccentSky
+                        else       -> AccentGreen
+                    }
+
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = CardBackground),
-                        shape = RoundedCornerShape(12.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
+                        shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(1.dp, CardBorder)
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(12.dp),
+                                .padding(14.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(text = item.fileName, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = TextPrimary, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                Text(text = item.category, fontSize = 11.sp, color = TextSecondary)
+                                Text(
+                                    text = item.fileName,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = TextPrimary,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = item.category.replace("_", " "),
+                                    fontSize = 11.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = TextMuted
+                                )
                             }
-                            val badgeColor = when (item.severity.uppercase()) {
-                                "CRITICAL", "HIGH" -> AccentRed
-                                "MEDIUM", "LOW" -> AccentYellow
-                                else -> AccentGreen
-                            }
-                            Text(
-                                text = "${item.score}/100",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = badgeColor,
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(6.dp))
-                                    .background(badgeColor.copy(alpha = 0.15f))
+                                    .background(badgeColor.copy(alpha = 0.12f))
+                                    .border(BorderStroke(1.dp, badgeColor.copy(alpha = 0.25f)), RoundedCornerShape(6.dp))
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
-                            )
+                            ) {
+                                Text(
+                                    text = "${item.score}",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Monospace,
+                                    color = badgeColor
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = item.severity.uppercase(),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = badgeColor
+                                )
+                            }
                         }
                     }
                 }
@@ -257,10 +331,10 @@ fun ScanningScreen(
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val scale by infiniteTransition.animateFloat(
-        initialValue = 0.95f,
-        targetValue = 1.08f,
+        initialValue = 0.96f,
+        targetValue = 1.04f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = FastOutSlowInEasing),
+            animation = tween(1100, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "scale"
@@ -276,37 +350,38 @@ fun ScanningScreen(
     ) {
         Box(
             modifier = Modifier
-                .size(130.dp)
+                .size(120.dp)
                 .scale(scale)
                 .clip(CircleShape)
-                .background(Color(0xFF1E1B4B).copy(alpha = 0.6f))
-                .border(2.dp, Color(0xFF818CF8), CircleShape),
+                .background(Color(0x0F38BDF8))
+                .border(1.dp, Color(0x3338BDF8), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
-                modifier = Modifier.size(80.dp),
-                color = Color(0xFF6366F1),
-                strokeWidth = 3.dp
+                modifier = Modifier.size(72.dp),
+                color = AccentSky,
+                strokeWidth = 2.5.dp
             )
-            Text(text = "🛡️", fontSize = 36.sp)
         }
 
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         Text(
-            text = "Analyzing Package...",
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            color = TextPrimary
+            text = "Analyzing Package",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = TextPrimary,
+            letterSpacing = (-0.3).sp
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
         Text(
             text = stageText,
-            fontSize = 14.sp,
+            fontSize = 13.sp,
+            fontFamily = FontFamily.Monospace,
             textAlign = TextAlign.Center,
-            color = Color(0xFFA5B4FC)
+            color = AccentSky
         )
 
         if (!sha256.isNullOrEmpty()) {
@@ -314,16 +389,22 @@ fun ScanningScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = CardBackground),
-                shape = RoundedCornerShape(12.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
+                shape = RoundedCornerShape(10.dp),
+                border = BorderStroke(1.dp, CardBorder)
             ) {
                 Column(modifier = Modifier.padding(12.dp)) {
-                    Text(text = "SHA-256 Fingerprint", fontSize = 11.sp, color = TextSecondary)
+                    Text(
+                        text = "SHA-256 FINGERPRINT",
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace,
+                        color = TextMuted
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = sha256,
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
-                        color = Color(0xFFD1D5DB),
+                        color = TextSecondary,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -341,14 +422,30 @@ fun VerdictScreen(
     onDismiss: () -> Unit
 ) {
     val score = scan.finalScore ?: 0
-    val isRed = score >= 75 || scan.severity.equals("CRITICAL", ignoreCase = true)
-    val isYellow = score in 40..74 || scan.severity.equals("HIGH", ignoreCase = true) || scan.severity.equals("MEDIUM", ignoreCase = true)
+    val sev = scan.severity?.uppercase() ?: "SAFE"
 
-    val themeColor = if (isRed) AccentRed else if (isYellow) AccentYellow else AccentGreen
-    val verdictTitle = if (isRed) "CRITICAL MALWARE THREAT" else if (isYellow) "POTENTIAL RISK DETECTED" else "APPLICATION VERIFIED SAFE"
-    val verdictSubtitle = if (isRed) "Do NOT install this application. Malicious Trojan or spyware payload detected."
-    else if (isYellow) "Application exhibits suspicious behaviors. Proceed with caution."
-    else "No malicious signatures, Trojan payloads, or risky permissions detected."
+    val themeColor = when (sev) {
+        "CRITICAL" -> AccentRed
+        "HIGH"     -> AccentOrange
+        "MEDIUM"   -> AccentYellow
+        "LOW"      -> AccentSky
+        else       -> AccentGreen
+    }
+
+    val isRed = sev == "CRITICAL" || score >= 75
+    val isYellow = sev in listOf("HIGH", "MEDIUM") || score in 20..74
+
+    val verdictTitle = when {
+        isRed    -> "CRITICAL MALWARE INTERCEPTED"
+        isYellow -> "POTENTIAL SECURITY RISK"
+        else     -> "PACKAGE VERIFIED CLEAN"
+    }
+
+    val verdictSubtitle = when {
+        isRed    -> "Do not install. Active malware, trojan, or spyware payload detected in bytecode."
+        isYellow -> "Suspicious permissions or heuristics detected. Exercise caution before installing."
+        else     -> "No malicious signatures, Trojan payloads, or risky permissions detected."
+    }
 
     Column(
         modifier = Modifier
@@ -359,72 +456,86 @@ fun VerdictScreen(
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Hero Verdict Card
+        // Hero Verdict Card with Left Accent Border
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = themeColor.copy(alpha = 0.12f)),
-            shape = RoundedCornerShape(20.dp),
-            border = androidx.compose.foundation.BorderStroke(2.dp, themeColor.copy(alpha = 0.6f))
+            colors = CardDefaults.cardColors(containerColor = CardBackground),
+            shape = RoundedCornerShape(14.dp),
+            border = BorderStroke(1.dp, CardBorder)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(20.dp)
             ) {
-                Text(
-                    text = if (isRed) "🚨" else if (isYellow) "⚠️" else "✅",
-                    fontSize = 44.sp
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(themeColor)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = sev,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace,
+                            color = themeColor
+                        )
+                    }
+
+                    Text(
+                        text = "$score / 100",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        color = TextPrimary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
                 Text(
                     text = verdictTitle,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Black,
-                    color = themeColor,
-                    textAlign = TextAlign.Center
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = TextPrimary
                 )
-                Spacer(modifier = Modifier.height(6.dp))
+
+                Spacer(modifier = Modifier.height(4.dp))
+
                 Text(
                     text = verdictSubtitle,
                     fontSize = 12.sp,
-                    color = TextPrimary,
-                    textAlign = TextAlign.Center,
-                    lineHeight = 16.sp
+                    color = TextSecondary,
+                    lineHeight = 17.sp
                 )
-                Spacer(modifier = Modifier.height(16.dp))
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                if (!scan.fraudCategory.isNullOrEmpty()) {
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "Score: $score/100",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
+                        text = "CATEGORY: ${(scan.fraudCategory ?: "").replace('_', ' ').uppercase()}",
+                        fontSize = 11.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.SemiBold,
                         color = themeColor,
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(themeColor.copy(alpha = 0.2f))
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(themeColor.copy(alpha = 0.1f))
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
                     )
-                    if (!scan.fraudCategory.isNullOrEmpty()) {
-                        Text(
-                            text = scan.fraudCategory.replace("_", " ").uppercase(),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = TextPrimary,
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFF374151))
-                                .padding(horizontal = 10.dp, vertical = 4.dp)
-                        )
-                    }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Triggered reasons list
         LazyColumn(
@@ -438,13 +549,24 @@ fun VerdictScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = CardBackground),
-                        shape = RoundedCornerShape(12.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
+                        shape = RoundedCornerShape(10.dp),
+                        border = BorderStroke(1.dp, CardBorder)
                     ) {
                         Column(modifier = Modifier.padding(14.dp)) {
-                            Text(text = "Behavioral Summary", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = TextPrimary)
+                            Text(
+                                text = "BEHAVIORAL SYNTHESIS",
+                                fontSize = 10.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.SemiBold,
+                                color = TextMuted
+                            )
                             Spacer(modifier = Modifier.height(4.dp))
-                            Text(text = scan.behaviorSummary, fontSize = 12.sp, color = TextSecondary, lineHeight = 16.sp)
+                            Text(
+                                text = scan.behaviorSummary,
+                                fontSize = 12.sp,
+                                color = TextSecondary,
+                                lineHeight = 17.sp
+                            )
                         }
                     }
                 }
@@ -453,19 +575,20 @@ fun VerdictScreen(
             if (scan.triggers.isNotEmpty()) {
                 item {
                     Text(
-                        text = "Detected Indicators (${scan.triggers.size})",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextPrimary,
-                        modifier = Modifier.padding(top = 4.dp, bottom = 2.dp)
+                        text = "DETECTED HEURISTICS (${scan.triggers.size})",
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextMuted,
+                        modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
                     )
                 }
                 items(scan.triggers) { trigger ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = CardBackground),
-                        shape = RoundedCornerShape(10.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
+                        shape = RoundedCornerShape(8.dp),
+                        border = BorderStroke(1.dp, CardBorder)
                     ) {
                         Row(
                             modifier = Modifier
@@ -473,19 +596,34 @@ fun VerdictScreen(
                                 .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = "•", fontSize = 16.sp, color = themeColor, modifier = Modifier.padding(end = 8.dp))
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(text = trigger.ruleId, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
-                                Text(text = trigger.description, fontSize = 11.sp, color = TextSecondary)
+                                Text(
+                                    text = trigger.ruleId,
+                                    fontSize = 12.sp,
+                                    fontFamily = FontFamily.Monospace,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = TextPrimary
+                                )
+                                Text(
+                                    text = trigger.description,
+                                    fontSize = 11.sp,
+                                    color = TextMuted
+                                )
                             }
-                            Text(text = "+${trigger.weight}", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = themeColor)
+                            Text(
+                                text = "+${trigger.weight}",
+                                fontSize = 12.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
+                                color = AccentOrange
+                            )
                         }
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Action Buttons
         if (isRed) {
@@ -493,11 +631,11 @@ fun VerdictScreen(
                 onClick = onDismiss,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
+                    .height(48.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = AccentRed),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Block & Discard Application", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text("Block & Discard Package", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
             }
         } else if (isYellow) {
             Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -505,21 +643,21 @@ fun VerdictScreen(
                     onClick = onDismiss,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF374151)),
-                    shape = RoundedCornerShape(12.dp)
+                        .height(44.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF27272A)),
+                    shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("Block Application", fontSize = 14.sp, color = Color.White)
+                    Text("Block Package", fontSize = 13.sp, color = TextPrimary)
                 }
                 OutlinedButton(
                     onClick = onInstallHandoff,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, AccentYellow)
+                        .height(44.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, AccentOrange)
                 ) {
-                    Text("Install with Caution", fontSize = 14.sp, color = AccentYellow)
+                    Text("Install with Caution", fontSize = 13.sp, color = AccentOrange)
                 }
             }
         } else {
@@ -527,13 +665,16 @@ fun VerdictScreen(
                 onClick = onInstallHandoff,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
+                    .height(48.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = AccentGreen),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Continue to Install", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text("Continue to Install", fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
     }
 }
+
+
+

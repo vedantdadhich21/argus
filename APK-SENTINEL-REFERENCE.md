@@ -444,11 +444,33 @@ Target end-to-end time: **under 40 seconds** for a mid-size APK (jadx is usually
 
 ## 9. AI Layer Contract (`ai_analyst.py`) — MOST IMPORTANT FILE TO GET RIGHT
 
-### Input assembly
+### Input assembly — the selection funnel (`method_selector.py`)
 
-1. `method_selector.py`: split each decompiled `.java` file into methods (simple brace-depth parser is fine). Score each method = number of distinct pattern-rule matches inside it. Take top `LLM_MAX_METHODS`.
-2. Each method block: `[file path] [method signature]` + source (truncated to `LLM_MAX_CHARS_PER_METHOD`).
-3. Context header: package name, requested permissions, triggered rule summaries, extracted IOCs.
+```
+jadx output (500–3000 files, 10k+ methods)
+  → SPLIT each file into methods (brace-depth parser)
+  → SCORE: suspicion = Σ weights of rules.yaml code_rules matching inside the method
+      · count DISTINCT rule matches per method (repeated same-pattern hits don't stack)
+      · +8 entry-point boost if the class is a manifest-declared receiver/service/
+        exported activity (attacker logic must hang off entry points)
+  → RANK desc → keep top LLM_MAX_METHODS, truncate each to LLM_MAX_CHARS_PER_METHOD
+  → assemble prompt: context header + annotated method blocks (~8k tokens total budget)
+```
+
+Edge cases:
+- **Zero pattern hits anywhere** → skip the LLM call entirely (`ai_status="skipped"`), verdict comes from rules alone (instant GREEN path).
+- **Fewer than N scored methods** → pad with largest methods from manifest-declared components so the model always has context.
+- **Cross-method flows (A→B→C calls)** — only the top method is sent for MVP; cross-method taint analysis is a roadmap item. Admit this if asked.
+
+#### Why regex survives obfuscation (judge-question armor)
+
+We match **Android framework API calls and manifest declarations**, NOT developer-chosen names:
+
+- Obfuscators (ProGuard/R8) rename only attacker-authored classes/methods (`StealOtp.send()` → `a.b.c()`). Framework contracts cannot be renamed: `abortBroadcast()`, `DexClassLoader`, `SmsManager.sendTextMessage`, `Cipher.getInstance`, `getDeviceId()` are resolved by canonical name against the OS at runtime — renaming them causes `NoSuchMethodError`.
+- Manifest signals are even more rigid: `<uses-permission android:name="android.permission.RECEIVE_SMS">` must appear verbatim or the capability doesn't exist.
+- Aggressive renaming itself trips `META_HEAVY_OBFUSCATION`; hiding API names behind strings requires reflection + crypto + Base64 — each independently scored (`CODE_REFLECTION`, `CODE_STRING_DECRYPTION`).
+
+Known blind spots (be honest if pushed): native `.so` payloads invisible to jadx; payloads fetched from network post-install (we see the `DexClassLoader`, not its remote DEX); framework APIs we haven't written a rule for. These are why the LLM reads flagged code *semantically* and why emulator-based dynamic analysis sits on the roadmap.
 
 ### Prompt skeleton (system prompt)
 

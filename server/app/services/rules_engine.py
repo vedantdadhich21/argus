@@ -74,9 +74,10 @@ def _ensure_loaded():
 # a legitimate app.
 # ---------------------------------------------------------------------------
 _SELF_SUFFICIENT_CODE_RULES = {
-    "CODE_SMS_ABORT",    # abortBroadcast() — no legitimate app silently deletes SMS
-    "CODE_FORWARD_SMS",  # SmsManager.sendTextMessage in non-SMS app = OTP exfiltration
-    "CODE_EXEC",         # Runtime.exec() — shell execution is almost always malicious
+    "CODE_SMS_ABORT",              # abortBroadcast() — no legitimate app silently deletes SMS
+    "CODE_FORWARD_SMS",            # SmsManager.sendTextMessage in non-SMS app = OTP exfiltration
+    "CODE_EXEC",                   # Runtime.exec() — shell execution is almost always malicious
+    "CODE_ACCESSIBILITY_CAPTURE",  # Accessibility screen scraping & event hijacking
 }
 
 # High-risk permission rule IDs — if ANY of these fire, code+IOC rules count
@@ -90,9 +91,7 @@ _HIGH_RISK_PERM_RULE_IDS = {
 }
 
 # Damping factor applied to code+IOC weights when no high-risk permission
-# rule fires. This prevents large feature-rich apps (shopping, social)
-# from scoring CRITICAL purely because they use many SDKs with reflection,
-# clipboard access, or camera APIs.
+# rule fires and no multi-signal synergy is present.
 _CODE_IOC_DAMPING_FACTOR = 0.30
 
 
@@ -109,22 +108,20 @@ def score(
     """
     Evaluate all rules and compute the risk score.
 
-    **Combo-gated scoring**: Code and IOC signals only count at full weight
-    when at least one high-risk permission rule is also triggered. Without
-    a dangerous permission anchor, code/IOC signals are dampened to
-    _CODE_IOC_DAMPING_FACTOR (30%) — they still appear in the trigger list
-    so analysts can see them, but don't inflate the score to CRITICAL for
-    large feature-rich apps that use common SDKs.
+    **Combo-gated scoring with Multi-Signal Synergy**:
+    Code and IOC signals count at full weight when:
+    1. At least one high-risk permission rule is triggered, OR
+    2. A self-sufficient rule triggers (e.g. CODE_SMS_ABORT, CODE_ACCESSIBILITY_CAPTURE), OR
+    3. Three or more distinct offensive code pattern rules fire together (synergy: multi-stage attack).
 
-    Self-sufficient rules (CODE_SMS_ABORT, CODE_FORWARD_SMS, CODE_EXEC)
-    always count at full weight regardless — no legitimate app ever
-    silently aborts SMS broadcasts or executes shell commands.
+    Otherwise, isolated code signals in permissionless apps are dampened by
+    _CODE_IOC_DAMPING_FACTOR (30%) to prevent false positives on common SDKs.
 
     Returns:
         {
             "rule_score": int (0–100),
             "severity": str,
-            "triggers": [{rule_id, description, weight, evidence, dampened}],
+            "triggers": [{rule_id, description, weight, effective_weight, evidence, dampened}],
         }
     """
     _ensure_loaded()
@@ -141,12 +138,23 @@ def score(
     for rule in _RULES.get("permission_rules", []):
         triggered, evidence = _eval_permission_rule(rule, perm_names, manifest_flags)
         if triggered:
-            triggers.append(_make_trigger(rule, evidence))
+            t = _make_trigger(rule, evidence)
+            t["effective_weight"] = rule["weight"]
+            t["dampened"] = False
+            triggers.append(t)
             perm_weight += rule["weight"]
             triggered_perm_rule_ids.add(rule["id"])
 
     # Determine whether any HIGH-RISK permission rule fired
     has_high_risk_perm = bool(triggered_perm_rule_ids & _HIGH_RISK_PERM_RULE_IDS)
+
+    # ---- Check distinct code rule count for multi-signal synergy ---------
+    unique_code_rule_ids = {
+        hit.get("rule_id") for hit in (pattern_hits or []) if hit.get("rule_id")
+    }
+    # If 3+ distinct offensive patterns fire together (e.g. Accessibility + Keylogger + Clipboard),
+    # this is an active multi-stage malware capability — lift the damping penalty.
+    has_multi_pattern_synergy = len(unique_code_rule_ids) >= 3
 
     # ---- Code rules (from pattern_hits already computed) -----------------
     if decompiled_available:
@@ -156,8 +164,10 @@ def score(
             if rule_id and rule_id in code_rule_ids:
                 raw_weight = hit.get("weight", 0)
                 is_self_sufficient = rule_id in _SELF_SUFFICIENT_CODE_RULES
-                dampened = not has_high_risk_perm and not is_self_sufficient
-                effective_weight = raw_weight if (has_high_risk_perm or is_self_sufficient) else int(raw_weight * _CODE_IOC_DAMPING_FACTOR)
+                full_weight_eligible = has_high_risk_perm or is_self_sufficient or has_multi_pattern_synergy
+                dampened = not full_weight_eligible
+                effective_weight = raw_weight if full_weight_eligible else int(raw_weight * _CODE_IOC_DAMPING_FACTOR)
+                
                 triggers.append({
                     "rule_id": rule_id,
                     "description": hit.get("description", code_rule_ids[rule_id].get("description", "")),
@@ -169,6 +179,7 @@ def score(
                 code_ioc_weight += effective_weight
     else:
         logger.info("Decompilation unavailable — code rules skipped")
+
 
     # ---- IOC rules -------------------------------------------------------
     all_ioc_text = _flatten_iocs(iocs)
@@ -193,9 +204,11 @@ def score(
         )
         if triggered:
             t = _make_trigger(rule, evidence)
+            t["effective_weight"] = rule["weight"]
             t["dampened"] = False
             triggers.append(t)
             metadata_weight += rule["weight"]
+
 
     # ---- Final score: perm + code_ioc (combo-gated) + metadata -----------
     total_weight = perm_weight + code_ioc_weight + metadata_weight

@@ -1,14 +1,6 @@
 import { getSeverityByLabel } from '../../lib/severity'
 import RiskGauge from './RiskGauge'
-import { Shield, AlertTriangle, CheckCircle2, Info } from 'lucide-react'
-
-const ICONS = {
-  CRITICAL: AlertTriangle,
-  HIGH:     AlertTriangle,
-  MEDIUM:   Info,
-  LOW:      Info,
-  SAFE:     CheckCircle2,
-}
+import { Shield, AlertCircle } from 'lucide-react'
 
 const CATEGORY_LABELS = {
   banking_trojan:    'Banking Trojan',
@@ -18,50 +10,69 @@ const CATEGORY_LABELS = {
   premium_sms_fraud: 'Premium SMS Fraud',
   ransomware:        'Ransomware',
   adware:            'Adware',
-  pupe:              'PUP/Adware',
-  benign:            'Benign',
+  pupe:              'PUP / Riskware',
+  benign:            'Benign Clean Sample',
+}
+
+const SEVERITY_COLORS = {
+  CRITICAL: '#ef4444',
+  HIGH:     '#f97316',
+  MEDIUM:   '#eab308',
+  LOW:      '#38bdf8',
+  SAFE:     '#22c55e',
 }
 
 export default function VerdictCard({ scan }) {
-  const sev  = getSeverityByLabel(scan.severity)
-  const Icon = ICONS[scan.severity] ?? Shield
+  const sev   = getSeverityByLabel(scan.severity)
+  const color = SEVERITY_COLORS[scan.severity] ?? '#71717a'
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border p-6 ${sev.bg} ${sev.border}`}>
-      {/* Background glow */}
-      <div className={`pointer-events-none absolute -top-20 -right-20 h-60 w-60 rounded-full opacity-20 blur-3xl`}
-        style={{ backgroundColor: sev.hex }} />
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 rounded-xl px-7 py-7 overflow-hidden transition-all"
+      style={{
+        background: '#0d0d10',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderLeft: `4px solid ${color}`,
+        boxShadow: '0 10px 30px -10px rgba(0,0,0,0.6)'
+      }}>
 
-      <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        {/* Left: verdict info */}
-        <div className="flex items-start gap-4">
-          <div className={`flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl ${sev.bg} border ${sev.border}`}>
-            <Icon className={`h-7 w-7 ${sev.color}`} />
-          </div>
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <span className={`text-3xl font-black tracking-tight ${sev.color}`}>{scan.severity}</span>
-              <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-xs text-slate-400">
-                {CATEGORY_LABELS[scan.fraud_category] ?? scan.fraud_category}
-              </span>
-            </div>
-            <p className="text-sm text-slate-400">{scan.original_filename}</p>
-            <p className="text-xs text-slate-600 mt-0.5">
-              SHA-256: {scan.sha256?.slice(0, 16)}…
-            </p>
-            {scan.ai_status === 'unavailable' && (
-              <p className="mt-2 text-xs text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 rounded px-2 py-1">
-                ⚠️ AI analysis unavailable — verdict based on rules engine only
-              </p>
-            )}
-          </div>
+      {/* Left: verdict info */}
+      <div className="flex flex-col gap-3 max-w-xl">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-3xl sm:text-4xl font-bold tracking-tight font-mono" style={{ color }}>
+            {scan.severity}
+          </span>
+          <span className="text-xs font-mono font-medium px-2.5 py-1 rounded"
+            style={{ color: '#d4d4d8', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            {CATEGORY_LABELS[scan.fraud_category] ?? scan.fraud_category ?? 'Unknown Category'}
+          </span>
         </div>
 
-        {/* Right: gauge */}
-        <div className="flex-shrink-0">
-          <RiskGauge score={scan.final_score} size="lg" />
+        <div>
+          <h2 className="text-lg sm:text-xl text-white font-semibold tracking-tight truncate max-w-md">
+            {scan.original_filename}
+          </h2>
+          <p className="text-xs font-mono text-zinc-500 mt-1 select-all break-all">
+            SHA-256: {scan.sha256}
+          </p>
         </div>
+
+        {scan.ai_status === 'unavailable' && (
+          <div className="flex items-center gap-2 text-xs font-medium text-amber-400 mt-1">
+            <AlertCircle className="h-3.5 w-3.5 flex-shrink-0" />
+            <span>AI narrative layer offline — score computed via deterministic rules engine</span>
+          </div>
+        )}
+      </div>
+
+      {/* Right: gauge */}
+      <div className="flex-shrink-0 flex items-center justify-center sm:justify-end">
+        <RiskGauge score={scan.final_score} size="lg" />
       </div>
     </div>
   )
 }
+
+
+
+
+

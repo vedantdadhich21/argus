@@ -1,8 +1,0 @@
-com.example.simplenotes.benign_notes-pngs-0 /Users/vedantdadhich/repos/argus/android/samples/benign_notes/build/generated/res/pngs/debug
-com.example.simplenotes.benign_notes-updated_navigation_xml-1 /Users/vedantdadhich/repos/argus/android/samples/benign_notes/build/generated/updated_navigation_xml/debug
-com.example.simplenotes.benign_notes-packageDebugResources-2 /Users/vedantdadhich/repos/argus/android/samples/benign_notes/build/intermediates/incremental/debug/packageDebugResources/merged.dir
-com.example.simplenotes.benign_notes-packageDebugResources-3 /Users/vedantdadhich/repos/argus/android/samples/benign_notes/build/intermediates/incremental/debug/packageDebugResources/stripped.dir
-com.example.simplenotes.benign_notes-debug-4 /Users/vedantdadhich/repos/argus/android/samples/benign_notes/build/intermediates/merged_res/debug/mergeDebugResources
-com.example.simplenotes.benign_notes-debug-5 /Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/debug/res
-com.example.simplenotes.benign_notes-main-6 /Users/vedantdadhich/repos/argus/android/samples/benign_notes/src/main/res
-gradleHome-0 /Users/vedantdadhich/.gradle

@@ -60,6 +60,7 @@ class MainActivity : ComponentActivity() {
         }
         client = SentinelClient(savedServerUrl)
 
+        refreshHistory()
         handleIncomingUri(intent?.data)
 
         setContent {
@@ -72,6 +73,7 @@ class MainActivity : ComponentActivity() {
                         client.setBaseUrl(newUrl)
                         prefs.edit().putString(KEY_SERVER_URL, newUrl).apply()
                         Toast.makeText(this, "Engine URL saved", Toast.LENGTH_SHORT).show()
+                        refreshHistory()
                     },
                     onInstallHandoff = { apkUri ->
                         if (apkUri != null) {
@@ -80,11 +82,27 @@ class MainActivity : ComponentActivity() {
                     },
                     onDismiss = {
                         uiState = ScreenState.Standby
+                        refreshHistory()
                     }
                 )
             }
         }
     }
+
+    private fun refreshHistory() {
+        lifecycleScope.launch {
+            try {
+                val remoteScans = client.fetchRecentScans()
+                if (remoteScans.isNotEmpty()) {
+                    scanHistory.clear()
+                    scanHistory.addAll(remoteScans)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "History refresh error: ${e.message}")
+            }
+        }
+    }
+
 
     @Composable
     private fun AppScreen(
@@ -216,19 +234,32 @@ class MainActivity : ComponentActivity() {
 
         // 3. Poll Scan Status
         var attempts = 0
-        val maxAttempts = 30
+        val maxAttempts = 60 // up to 120s for deep jadx decompilation and AI analysis
+        var consecutiveNetworkErrors = 0
+
         while (attempts < maxAttempts) {
-            delay(1800)
+            delay(2000)
             val scan = client.pollScan(scanId)
             if (scan.status == "completed") {
                 addToHistory(fileName, scan)
                 uiState = ScreenState.Verdict(scan, uri)
                 return
             } else if (scan.status == "failed") {
-                Toast.makeText(this, "Scan analysis reported an error", Toast.LENGTH_SHORT).show()
+                val err = scan.errorMessage ?: "Scan analysis reported an error"
+                Log.e(TAG, "Scan failed: $err")
+                Toast.makeText(this, "Scan analysis failed on server", Toast.LENGTH_SHORT).show()
                 uiState = ScreenState.Standby
                 return
+            } else if (scan.status == "network_error") {
+                consecutiveNetworkErrors++
+                Log.w(TAG, "Transient network error ($consecutiveNetworkErrors/6)")
+                if (consecutiveNetworkErrors >= 6) {
+                    Toast.makeText(this, "Connection lost to threat engine", Toast.LENGTH_SHORT).show()
+                    uiState = ScreenState.Standby
+                    return
+                }
             } else {
+                consecutiveNetworkErrors = 0
                 val hint = scan.progressHint ?: "Analyzing stage (${attempts + 1}/$maxAttempts)..."
                 uiState = ScreenState.Scanning(hint, sha256)
             }
@@ -238,6 +269,7 @@ class MainActivity : ComponentActivity() {
         Toast.makeText(this, "Analysis timed out. Please check server.", Toast.LENGTH_SHORT).show()
         uiState = ScreenState.Standby
     }
+
 
     private fun addToHistory(fileName: String, scan: ScanDetailResponse) {
         scanHistory.add(

@@ -149,12 +149,50 @@ class SentinelClient(private var baseUrl: String = DEFAULT_BASE_URL) {
                 ScanDetailResponse.fromJson(responseStr)
             } else {
                 val err = conn.errorStream?.bufferedReader()?.use { it.readText() } ?: "HTTP $responseCode"
-                ScanDetailResponse(scanId = scanId, status = "failed", errorMessage = err)
+                ScanDetailResponse(scanId = scanId, status = "network_error", errorMessage = err)
             }
         } catch (e: Exception) {
-            ScanDetailResponse(scanId = scanId, status = "failed", errorMessage = e.message)
+            ScanDetailResponse(scanId = scanId, status = "network_error", errorMessage = e.message)
+        } finally {
+            conn.disconnect()
+        }
+    }
+
+
+    suspend fun fetchRecentScans(): List<ScanHistoryItem> = withContext(Dispatchers.IO) {
+        val url = URL("$baseUrl/api/scans?page=1&limit=10")
+        val conn = (url.openConnection() as HttpURLConnection).apply {
+            requestMethod = "GET"
+            connectTimeout = CONNECT_TIMEOUT_MS
+            readTimeout = READ_TIMEOUT_MS
+        }
+
+        try {
+            val responseCode = conn.responseCode
+            if (responseCode in 200..299) {
+                val responseStr = conn.inputStream.bufferedReader().use { it.readText() }
+                val json = JSONObject(responseStr)
+                val itemsArr = json.optJSONArray("items") ?: org.json.JSONArray()
+                val list = mutableListOf<ScanHistoryItem>()
+                for (i in 0 until itemsArr.length()) {
+                    val obj = itemsArr.getJSONObject(i)
+                    val scanId = obj.optString("scan_id", "")
+                    val fileName = obj.optString("file_name", "Package.apk")
+                    val score = obj.optInt("final_score", obj.optInt("rule_score", 0))
+                    val severity = obj.optString("severity", "SAFE")
+                    val category = obj.optString("fraud_category", "Benign")
+                    list.add(ScanHistoryItem(scanId, fileName, score, severity, category))
+                }
+                list
+            } else {
+                emptyList()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed fetching recent scans: ${e.message}")
+            emptyList()
         } finally {
             conn.disconnect()
         }
     }
 }
+

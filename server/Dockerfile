@@ -36,8 +36,8 @@ RUN mkdir -p storage/apks storage/decompiled storage/reports
 EXPOSE 8000
 
 ENV PORT=8000
-ENV DATABASE_URL=sqlite:///./sentinel.db
+ENV DATABASE_URL=sqlite:///./storage/sentinel.db
 ENV STORAGE_DIR=./storage
 ENV JADX_PATH=jadx
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

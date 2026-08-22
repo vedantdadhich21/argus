@@ -1,55 +1,65 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Shield, History, Code2, Home } from 'lucide-react'
+import { History, Code2, Home, Shield } from 'lucide-react'
 
 const links = [
-  { to: '/',        label: 'Home',     icon: Home },
-  { to: '/history', label: 'History',  icon: History },
-  { to: '/docs',    label: 'API Docs', icon: Code2 },
+  { to: '/',        label: 'Analyzer', icon: Home },
+  { to: '/history', label: 'Telemetry', icon: History },
+  { to: '/docs',    label: 'API Reference', icon: Code2 },
 ]
 
 export default function Navbar() {
   const { pathname } = useLocation()
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-slate-950/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 font-bold text-lg text-white group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-lg shadow-red-500/20 group-hover:shadow-red-500/40 transition-shadow">
-            <Shield className="w-4 h-4 text-white" />
+    <nav style={{ background: 'rgba(8,8,10,0.85)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+      className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 sm:px-8 h-14">
+
+        {/* Logo — wordmark with subtle security emblem */}
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <div className="h-6 w-6 rounded flex items-center justify-center"
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <Shield className="h-3.5 w-3.5 text-zinc-200 group-hover:text-white transition-colors" />
           </div>
-          <span className="tracking-tight">
-            <span className="text-white">Argus</span>
+          <span className="text-sm font-semibold tracking-tight text-white font-sans">Argus</span>
+          <span className="text-[11px] font-mono font-medium px-1.5 py-0.5 rounded text-zinc-400"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            Mobile MTD
           </span>
         </Link>
 
-        {/* Links */}
+        {/* Nav links */}
         <div className="flex items-center gap-1">
-          {links.map(({ to, label, icon: Icon }) => {
-            const active = pathname === to
+          {links.map(({ to, label }) => {
+            const active = pathname === to || (to !== '/' && pathname.startsWith(to))
             return (
               <Link
                 key={to}
                 to={to}
-                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-                  active
-                    ? 'bg-white/10 text-white'
-                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
-                }`}
+                className="px-3.5 py-1.5 text-xs font-medium rounded-md transition-all duration-150"
+                style={{
+                  color: active ? '#fafafa' : '#a1a1aa',
+                  background: active ? 'rgba(255,255,255,0.08)' : 'transparent',
+                }}
+                onMouseEnter={e => { if (!active) { e.currentTarget.style.color = '#fafafa'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)' } }}
+                onMouseLeave={e => { if (!active) { e.currentTarget.style.color = '#a1a1aa'; e.currentTarget.style.background = 'transparent' } }}
               >
-                <Icon className="h-3.5 w-3.5" />
                 {label}
               </Link>
             )
           })}
         </div>
 
-        {/* Badge */}
-        <div className="flex items-center gap-1.5 rounded-full border border-green-500/20 bg-green-500/10 px-3 py-1">
-          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-400" />
-          <span className="text-xs font-medium text-green-400">Live</span>
+        {/* Operational Status badge */}
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full"
+          style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)' }}>
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400"
+            style={{ boxShadow: '0 0 6px rgba(52,211,153,0.9)', animation: 'pulse 2s cubic-bezier(0.4,0,0.6,1) infinite' }} />
+          <span className="text-[11px] font-mono font-medium text-emerald-400">Cluster Online</span>
         </div>
+
       </div>
     </nav>
   )
 }
+
