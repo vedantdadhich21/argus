@@ -235,19 +235,34 @@ def _extract_cert(a) -> Dict[str, Any]:
 
 
 def _check_embedded_payloads(a) -> Dict[str, bool]:
-    """Check assets/resources for nested APK, DEX, or ELF files."""
+    """Check assets/resources for nested APK, DEX, or ELF files.
+
+    Known-SDK DEX files bundled inside assets/ (e.g. Facebook Audience Network)
+    are allowlisted by filename prefix so they don't produce false positives.
+    """
+    # Known legitimate SDK dex files that live inside assets/
+    _KNOWN_SDK_DEX_NAMES = {
+        "audience_network.dex",   # Facebook Audience Network
+        "tinker_classn.dex",      # Tencent Tinker hot-patch framework
+        "multidex.dex",           # AndroidX MultiDex shim
+        "secondary.dex",          # Generic secondary MultiDex shard (not a payload)
+    }
+
     result = {"nested_apk": False, "nested_dex": False, "nested_elf": False}
     try:
         files = a.get_files() or []
         for f in files:
             fl = f.lower()
+            basename = fl.rsplit("/", 1)[-1]
             # Root classes*.dex is standard compiled bytecode, not nested payload
             is_in_payload_dir = fl.startswith("assets/") or fl.startswith("res/")
             if is_in_payload_dir:
                 if fl.endswith(".apk"):
                     result["nested_apk"] = True
                 elif fl.endswith(".dex"):
-                    result["nested_dex"] = True
+                    # Skip well-known SDK dex files distributed inside assets/
+                    if basename not in _KNOWN_SDK_DEX_NAMES:
+                        result["nested_dex"] = True
                 elif fl.endswith(".so") or fl.endswith(".elf"):
                     result["nested_elf"] = True
             elif fl.endswith(".apk") and not fl.startswith("classes"):
