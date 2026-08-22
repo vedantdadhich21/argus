@@ -64,13 +64,11 @@ async def create_scan(
             detail="Too many scans in progress. Maximum 2 concurrent scans. Try again shortly.",
         )
 
-    # Validate filename extension (quick pre-check)
-    filename = file.filename or ""
+    # Validate filename extension (normalize if omitted by mobile content provider)
+    filename = file.filename or "upload.apk"
     if not filename.lower().endswith(".apk"):
-        raise HTTPException(
-            status_code=415,
-            detail="Only .apk files are accepted.",
-        )
+        filename = f"{filename}.apk"
+        file.filename = filename
 
     scan_id = uuid.uuid4().hex
 

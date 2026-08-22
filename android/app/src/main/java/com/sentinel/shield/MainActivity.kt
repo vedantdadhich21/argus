@@ -51,8 +51,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        val savedServerUrl = prefs.getString(KEY_SERVER_URL, SentinelClient.DEFAULT_BASE_URL)
+        var savedServerUrl = prefs.getString(KEY_SERVER_URL, SentinelClient.DEFAULT_BASE_URL)
             ?: SentinelClient.DEFAULT_BASE_URL
+        // Automatically migrate if saved URL had no port or was from old network
+        if (!savedServerUrl.contains(":8000") || savedServerUrl.contains("10.35.63.179")) {
+            savedServerUrl = SentinelClient.DEFAULT_BASE_URL
+            prefs.edit().putString(KEY_SERVER_URL, savedServerUrl).apply()
+        }
         client = SentinelClient(savedServerUrl)
 
         handleIncomingUri(intent?.data)
@@ -248,6 +253,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun Uri.lastPathPathName(): String? {
-        return this.lastPathSegment?.substringAfterLast('/')
+        val segment = this.lastPathSegment?.substringAfterLast('/') ?: "sample"
+        return if (segment.endsWith(".apk", ignoreCase = true)) segment else "$segment.apk"
     }
 }
