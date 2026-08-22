@@ -114,7 +114,48 @@ def clone_scan(existing: Scan, new_scan_id: str, original_filename: str, db: Ses
     """
     Clone a completed scan result for a duplicate file.
     Returns a new Scan row with status=completed instantly.
+
+    NOTE: We re-score using the current rules_engine so that any scoring
+    calibration changes take effect immediately on hash-cached files.
     """
+    import json as _json
+    # Re-score with current rules engine to pick up any weight/logic changes
+    try:
+        from app.services import rules_engine as _re
+        permissions      = _json.loads(existing.permissions or "[]")
+        pattern_hits_raw = _json.loads(existing.pattern_hits or "[]")
+        iocs             = _json.loads(existing.iocs or "{}")
+        manifest_flags   = _json.loads(existing.manifest_flags or "{}")
+        certificate      = _json.loads(existing.certificate or "{}")
+        embedded_payloads= _json.loads(existing.embedded_payloads or "{}")
+        app_metadata     = _json.loads(existing.app_metadata or "{}")
+
+        # Filter pattern_hits to only raw code hits (no perm/meta triggers)
+        # so rules_engine can re-evaluate them fresh
+        _re._ensure_loaded()
+        code_hit_ids = {r["id"] for r in _re._RULES.get("code_rules", [])}
+        raw_code_hits = [h for h in pattern_hits_raw if h.get("rule_id", "") in code_hit_ids]
+        has_decompiled = bool(raw_code_hits)
+
+        rescored = _re.score(
+            permissions=permissions, pattern_hits=raw_code_hits, iocs=iocs,
+            manifest_flags=manifest_flags, certificate=certificate,
+            embedded_payloads=embedded_payloads, app_metadata=app_metadata,
+            decompiled_available=has_decompiled,
+        )
+        new_rule_score = rescored["rule_score"]
+        new_severity   = rescored["severity"]
+
+        # Rebuild merged hits with fresh triggers
+        from app.services.pipeline import _merge_hits_and_triggers
+        new_pattern_hits = _json.dumps(_merge_hits_and_triggers(raw_code_hits, rescored["triggers"]))
+        logger.info("Hash cache rescore: %s → score %d (was %d)", new_scan_id, new_rule_score, existing.rule_score or 0)
+    except Exception as exc:
+        logger.warning("clone_scan rescore failed, using cached score: %s", exc)
+        new_rule_score   = existing.rule_score
+        new_severity     = existing.severity
+        new_pattern_hits = existing.pattern_hits
+
     new_scan = Scan(
         id=new_scan_id,
         status="completed",
@@ -127,12 +168,12 @@ def clone_scan(existing: Scan, new_scan_id: str, original_filename: str, db: Ses
         permissions=existing.permissions,
         components=existing.components,
         manifest_flags=existing.manifest_flags,
-        pattern_hits=existing.pattern_hits,
+        pattern_hits=new_pattern_hits,
         iocs=existing.iocs,
         embedded_payloads=existing.embedded_payloads,
-        rule_score=existing.rule_score,
-        final_score=existing.final_score,
-        severity=existing.severity,
+        rule_score=new_rule_score,
+        final_score=new_rule_score,
+        severity=new_severity,
         fraud_category=existing.fraud_category,
         ai_status=existing.ai_status,
         ai_analysis=existing.ai_analysis,
