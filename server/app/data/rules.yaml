@@ -1,0 +1,186 @@
+# rules.yaml — APK Sentinel detection rules
+# ALL rule weights live here. Adding a rule = add entry here + pattern in pattern_scanner.py.
+# No other code changes needed.
+# Schema frozen per APK-SENTINEL-REFERENCE.md §7.
+
+permission_rules:
+  - id: PERM_SMS_INTERCEPTION_COMBO
+    description: "READ_SMS + RECEIVE_SMS + SEND_SMS together = OTP interception capability"
+    required_permissions:
+      - android.permission.READ_SMS
+      - android.permission.RECEIVE_SMS
+      - android.permission.SEND_SMS
+    weight: 30
+
+  - id: PERM_ACCESSIBILITY
+    description: "Accessibility service abuse — can read screen content & capture credentials"
+    required_permissions:
+      - android.permission.BIND_ACCESSIBILITY_SERVICE
+    weight: 20
+
+  - id: PERM_OVERLAY
+    description: "Draw-over-apps — overlay phishing attacks on login screens"
+    required_permissions:
+      - android.permission.SYSTEM_ALERT_WINDOW
+    weight: 12
+
+  - id: PERM_DROPPER
+    description: "Can install other packages — dropper/stager behavior"
+    required_permissions:
+      - android.permission.REQUEST_INSTALL_PACKAGES
+    weight: 18
+
+  - id: PERM_CONTACTS
+    description: "Reads device contacts — harvests victim contact list"
+    required_permissions:
+      - android.permission.READ_CONTACTS
+    weight: 8
+
+  - id: PERM_DEVICE_ADMIN
+    description: "Requests device admin — resists uninstall"
+    required_device_admin: true
+    weight: 18
+
+  - id: PERM_BOOT_PERSISTENCE
+    description: "Runs at device boot — persistence mechanism"
+    required_permissions:
+      - android.permission.RECEIVE_BOOT_COMPLETED
+    weight: 5
+
+  - id: PERM_CALL_LOG
+    description: "Reads call logs — victim surveillance"
+    required_permissions:
+      - android.permission.READ_CALL_LOG
+    weight: 8
+
+  - id: PERM_LOCATION
+    description: "Accesses precise location — victim tracking"
+    required_permissions:
+      - android.permission.ACCESS_FINE_LOCATION
+    weight: 6
+
+code_rules:
+  # Matched by pattern_scanner.py regex over decompiled .java sources
+
+  - id: CODE_DYNAMIC_LOADING
+    pattern: "DexClassLoader|PathClassLoader\\("
+    description: "Loads executable code at runtime — hides real payload from scanners"
+    weight: 18
+
+  - id: CODE_SMS_ABORT
+    pattern: "abortBroadcast\\(\\)"
+    description: "Silently deletes incoming SMS — classic OTP-stealing behavior"
+    weight: 22
+
+  - id: CODE_REFLECTION
+    pattern: "Class\\.forName\\(|Method\\.invoke\\("
+    description: "Heavy reflection usage — obfuscation and runtime code hiding"
+    weight: 8
+
+  - id: CODE_STRING_DECRYPTION
+    pattern: "(Cipher\\.getInstance|javax\\.crypto).{0,200}(Base64|decrypt)"
+    description: "Runtime string decryption — obfuscating C2 config"
+    weight: 10
+
+  - id: CODE_EXEC
+    pattern: "Runtime\\.getRuntime\\(\\)\\.exec"
+    description: "Shell command execution — privilege escalation or payload drop"
+    weight: 6
+
+  - id: CODE_CONTACT_ENUM
+    pattern: "content://com\\.android\\.contacts"
+    description: "Enumerates device contacts via ContentProvider"
+    weight: 8
+
+  - id: CODE_DEVICE_ID_HARVEST
+    pattern: "getDeviceId\\(|getImei\\(|getSubscriberId\\("
+    description: "Harvests device identifiers (IMEI/subscriber ID)"
+    weight: 6
+
+  - id: CODE_FORWARD_SMS
+    pattern: "SmsManager.*sendTextMessage|telephony\\.gsm\\.content"
+    description: "Forwards SMS messages — OTP exfiltration pattern"
+    weight: 15
+
+  - id: CODE_ACCESSIBILITY_CAPTURE
+    pattern: "AccessibilityNodeInfo|performAction|TYPE_VIEW_TEXT_CHANGED"
+    description: "Uses accessibility API to capture screen text"
+    weight: 14
+
+  - id: CODE_OVERLAY_DRAW
+    pattern: "WindowManager\\.LayoutParams\\.TYPE_APPLICATION_OVERLAY|TYPE_SYSTEM_ALERT"
+    description: "Draws overlay window — credential phishing surface"
+    weight: 12
+
+  - id: CODE_KEYLOGGER_PATTERN
+    pattern: "onKeyDown|dispatchKeyEvent|KeyEvent\\.KEYCODE"
+    description: "Potential keylogging via key event interception"
+    weight: 8
+
+  - id: CODE_CLIPBOARD_STEAL
+    pattern: "ClipboardManager|getPrimaryClip\\(\\)"
+    description: "Reads clipboard content — can steal crypto addresses or passwords"
+    weight: 8
+
+  - id: CODE_CAMERA_BACKGROUND
+    pattern: "Camera\\.open\\(|CameraManager.*openCamera"
+    description: "Opens camera — potential silent recording"
+    weight: 6
+
+ioc_rules:
+  - id: IOC_RAW_IP_URL
+    pattern: "https?://[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}"
+    description: "Communicates with bare IP — typical C2 infrastructure"
+    weight: 10
+
+  - id: IOC_HTTP_NO_TLS
+    pattern: "http://"
+    description: "Cleartext HTTP endpoints — insecure data exfiltration"
+    weight: 4
+    max_applications: 3   # cap stacking: apply at most 3 times
+
+  - id: IOC_SUSPICIOUS_TLD
+    pattern: "https?://[^/\"'\\s]+(\\.(xyz|top|click|tk|ml|ga|cf|gq|pw|cc|su))[/\"'\\s]"
+    description: "Domain with suspicious TLD commonly used by malware"
+    weight: 8
+
+  - id: IOC_TELEGRAM_BOT
+    pattern: "t\\.me/|api\\.telegram\\.org/bot"
+    description: "Telegram bot used as C2 channel"
+    weight: 12
+
+  - id: IOC_NGROK_TUNNEL
+    pattern: "ngrok\\.io|ngrok\\.app"
+    description: "ngrok tunnel — dynamic C2 hosting"
+    weight: 10
+
+metadata_rules:
+  - id: META_DEBUG_SIGNED
+    condition: "cert.debug_signed == true"
+    description: "Signed with Android debug certificate — never used in legitimate distribution"
+    weight: 10
+
+  - id: META_SELF_SIGNED
+    condition: "cert.self_signed == true"
+    description: "Self-signed certificate — no app store accountability"
+    weight: 6
+
+  - id: META_NESTED_APK
+    condition: "payloads.nested_apk == true"
+    description: "Contains another APK inside assets — multi-stage dropper"
+    weight: 20
+
+  - id: META_NESTED_DEX
+    condition: "payloads.nested_dex == true"
+    description: "Contains extra DEX file — dynamic code loading payload"
+    weight: 15
+
+  - id: META_TYPOSQUAT
+    condition: "package_name within edit_distance<=2 of legit_banking_packages"
+    description: "Package name impersonates a legitimate banking app"
+    weight: 25
+
+  - id: META_HEAVY_OBFUSCATION
+    condition: "fraction_of_single_letter_class_names > 0.6"
+    description: "Heavily obfuscated codebase — typical of commercial malware"
+    weight: 8

@@ -20,6 +20,12 @@ Keep entries ≤ 15 lines. Link to commits where useful. Checkpoint merges (CP1/
 
 ## Entries
 
+### [Block 1+2 · A] Backend pipeline stages 1–6 complete — a/backend
+- Did: built all 14 Person A files from scratch: `config.py`, `database.py`, `models.py`, `schemas.py`, `main.py`, `routers/scans.py`, `services/storage.py`, `services/static_analysis.py`, `services/decompiler.py`, `services/pattern_scanner.py`, `services/ioc_extractor.py`, `services/rules_engine.py`, `services/pipeline.py`, `data/rules.yaml`, `data/legit_banking_packages.json`
+- How: FastAPI app with CORS + startup (creates storage dirs + SQLite tables). Pipeline runs in BackgroundTasks with per-stage status updates to DB. Stages 7–8 use import guards (graceful degradation if Person B's files absent). CLI entry point at `python -m app.services.pipeline --sample <apk>` for standalone testing.
+- Gotchas: (1) `androguard==3.3.5` `get_certificates_v3/v2` fallback chain needed — pin the version. (2) jadx outputs partial results on non-zero exit (still usable); check `.java` file count not return code. (3) `check_same_thread=False` mandatory for SQLite + FastAPI threading. (4) `pattern_hits` column doubles as trigger storage (merged after scoring) — Person C must deserialize the whole list for ScoreBreakdown.
+- Next: Person B wires `ai_analyst.py` + `report_generator.py` (already import-guarded in pipeline.py). CP1: flip `VITE_USE_MOCKS=false` on C's dashboard, upload `samples/fake_banker.apk`, confirm CRITICAL verdict appears.
+
 ### [Pre-hackathon · Block 0] ✅ RISK SPIKE PASSED — main
 - Did: tested on physical device (Nothing A015, wireless debugging). Tapped a real .apk in Files app → chooser offered "Sentinel Shield" → Logcat `tag:Sentinel` shows full chain: `intercepted URI: content://com.google.android.apps.nbu.files.provider/…` → `read 17534594 bytes` (= exactly 17.53 MB decimal, matches file listing) → `zip magic=[80, 75]`. Interception + ContentResolver streaming both confirmed.
 - How: §14 manifest filter registered first try; no fallback needed — native phone flow is GO for Block 3. Byte count matching the visible file size doubles as a read-integrity check.
