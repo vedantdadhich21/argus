@@ -83,6 +83,11 @@ class SentinelClient(private var baseUrl: String = DEFAULT_BASE_URL) {
         val lineEnd = "\r\n"
         val twoHyphens = "--"
 
+        val headerBytes = (twoHyphens + boundary + lineEnd +
+                "Content-Disposition: form-data; name=\"file\"; filename=\"$fileName\"" + lineEnd +
+                "Content-Type: application/vnd.android.package-archive" + lineEnd + lineEnd).toByteArray(Charsets.UTF_8)
+        val footerBytes = (lineEnd + twoHyphens + boundary + twoHyphens + lineEnd).toByteArray(Charsets.UTF_8)
+
         val url = URL("$baseUrl/api/scan")
         val conn = (url.openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
@@ -91,33 +96,24 @@ class SentinelClient(private var baseUrl: String = DEFAULT_BASE_URL) {
             doInput = true
             doOutput = true
             useCaches = false
+            setChunkedStreamingMode(65536)
+            setRequestProperty("Connection", "Keep-Alive")
             setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
         }
 
         try {
-            val outputStream: OutputStream = conn.outputStream
-            val writer = PrintWriter(OutputStreamWriter(outputStream, "UTF-8"), true)
-
-            // Header for file parameter
-            writer.append(twoHyphens).append(boundary).append(lineEnd)
-            writer.append("Content-Disposition: form-data; name=\"file\"; filename=\"$fileName\"").append(lineEnd)
-            writer.append("Content-Type: application/vnd.android.package-archive").append(lineEnd)
-            writer.append("Content-Transfer-Encoding: binary").append(lineEnd)
-            writer.append(lineEnd).flush()
-
-            // Stream APK content directly
-            context.contentResolver.openInputStream(uri)?.use { inputStream ->
-                val buffer = ByteArray(8192)
-                var bytesRead: Int
-                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
-                    outputStream.write(buffer, 0, bytesRead)
+            conn.outputStream.use { os ->
+                os.write(headerBytes)
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    val buffer = ByteArray(65536)
+                    var bytesRead: Int
+                    while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                        os.write(buffer, 0, bytesRead)
+                    }
                 }
-                outputStream.flush()
+                os.write(footerBytes)
+                os.flush()
             }
-
-            writer.append(lineEnd).flush()
-            writer.append(twoHyphens).append(boundary).append(twoHyphens).append(lineEnd).flush()
-            writer.close()
 
             val responseCode = conn.responseCode
             if (responseCode in 200..299) {
