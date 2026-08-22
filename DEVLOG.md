@@ -26,6 +26,12 @@ Keep entries ≤ 15 lines. Link to commits where useful. Checkpoint merges (CP1/
 - Gotchas: (1) Missing `import os` and `from app.services.storage import get_decompiled_dir` in pipeline stage 7–8 block — now fixed. (2) `ai_status: unavailable` is correct behavior when no `LLM_API_KEY` in `.env` — B's heuristic fallback produces a valid schema but `analyze()` returns `None` without a key (by design). (3) jadx exits code 3 on our debug APK (partial output) — gracefully handled, pattern scan still runs.
 - Next: CP1 ready. Person C flips `VITE_USE_MOCKS=false`, uploads `fake_banker.apk` (B's job to build), confirm CRITICAL verdict + report download works on real dashboard. Server: `uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload` for LAN access.
 
+### [H+3.5h · Block 1] Person C — c/frontend
+- Did: Full dashboard scaffolded in `client/` (Vite, React 18, Tailwind CSS, TanStack Query v5, Axios, React Router v6). Built all pages (Home, ScanDetail, History, ApiDocs) & components (Dropzone, RiskGauge, VerdictCard, PipelineStatus, ScoreBreakdown, PermissionTable, AttackChain, IocTable, MitreList, AiFindings).
+- How: Mapped against frozen fixture `client/src/mocks/scanResponse.json` (§11). `VITE_USE_MOCKS=true` simulates artificial pipeline delays without needing backend.
+- Gotchas: Node.js PATH issue on Windows resolved by user-level PATH setx; production build verified clean via `npm run build`.
+- Next: Block 2 (History + stats mock polish) → Checkpoint 1 integration.
+
 ### [Block 1+2 · A] Backend pipeline stages 1–6 complete — a/backend
 - Did: built all 14 Person A files from scratch: `config.py`, `database.py`, `models.py`, `schemas.py`, `main.py`, `routers/scans.py`, `services/storage.py`, `services/static_analysis.py`, `services/decompiler.py`, `services/pattern_scanner.py`, `services/ioc_extractor.py`, `services/rules_engine.py`, `services/pipeline.py`, `data/rules.yaml`, `data/legit_banking_packages.json`
 - How: FastAPI app with CORS + startup (creates storage dirs + SQLite tables). Pipeline runs in BackgroundTasks with per-stage status updates to DB. Stages 7–8 use import guards (graceful degradation if Person B's files absent). CLI entry point at `python -m app.services.pipeline --sample <apk>` for standalone testing.

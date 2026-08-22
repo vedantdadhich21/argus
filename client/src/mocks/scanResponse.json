@@ -1,0 +1,117 @@
+{
+  "scan_id": "9f1c4e2a8b3d7f0c5e6a1b4d2c8f9e3a",
+  "status": "completed",
+  "progress_hint": "Analysis complete",
+  "original_filename": "PhotoVault.apk",
+  "sha256": "a3f5c8e2d1b4f7a9c0e3b6d8f1a4c7e0b2d5f8a1c4e7f0b3d6a9c2e5f8b1d4",
+  "md5": "7a3f9c1e5b8d2f4a6c0e3b7d9f1a5c8e",
+  "file_size_bytes": 18432000,
+  "rule_score": 87,
+  "final_score": 87,
+  "severity": "CRITICAL",
+  "fraud_category": "banking_trojan",
+  "ai_status": "ok",
+  "duration_ms": 28400,
+  "created_at": "2026-08-21T14:02:33Z",
+  "app_metadata": {
+    "package_name": "com.photovault.secure",
+    "label": "PhotoVault",
+    "version_name": "2.1.4",
+    "version_code": 214,
+    "min_sdk": 26,
+    "target_sdk": 33
+  },
+  "certificate": {
+    "subject": "CN=Android Debug, O=Android, C=US",
+    "self_signed": true,
+    "debug_signed": true,
+    "sha1_fingerprint": "AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD"
+  },
+  "permissions": [
+    { "name": "android.permission.READ_SMS", "danger_level": "dangerous" },
+    { "name": "android.permission.RECEIVE_SMS", "danger_level": "dangerous" },
+    { "name": "android.permission.SEND_SMS", "danger_level": "dangerous" },
+    { "name": "android.permission.BIND_ACCESSIBILITY_SERVICE", "danger_level": "dangerous" },
+    { "name": "android.permission.SYSTEM_ALERT_WINDOW", "danger_level": "dangerous" },
+    { "name": "android.permission.REQUEST_INSTALL_PACKAGES", "danger_level": "dangerous" },
+    { "name": "android.permission.READ_CONTACTS", "danger_level": "dangerous" },
+    { "name": "android.permission.RECEIVE_BOOT_COMPLETED", "danger_level": "normal" },
+    { "name": "android.permission.INTERNET", "danger_level": "normal" },
+    { "name": "android.permission.ACCESS_NETWORK_STATE", "danger_level": "normal" }
+  ],
+  "components": [
+    { "type": "activity", "name": "com.photovault.secure.MainActivity", "exported": true },
+    { "type": "receiver", "name": "com.photovault.secure.SmsInterceptor", "exported": true },
+    { "type": "service", "name": "com.photovault.secure.AccessibilityOverlayService", "exported": false }
+  ],
+  "manifest_flags": {
+    "cleartext_traffic": true,
+    "device_admin": false,
+    "deep_links": [],
+    "debug_mode": true
+  },
+  "pattern_hits": [
+    { "rule_id": "CODE_SMS_ABORT", "evidence": "abortBroadcast() call in SmsInterceptor.onReceive()", "file": "com/photovault/secure/SmsInterceptor.java", "weight": 22 },
+    { "rule_id": "CODE_DYNAMIC_LOADING", "evidence": "new DexClassLoader(dexPath, optimizedDir, null, classLoader)", "file": "com/photovault/secure/PayloadLoader.java", "weight": 18 },
+    { "rule_id": "CODE_STRING_DECRYPTION", "evidence": "Cipher.getInstance(\"AES/CBC/PKCS5Padding\") with Base64 decode", "file": "com/photovault/secure/Config.java", "weight": 10 },
+    { "rule_id": "CODE_CONTACT_ENUM", "evidence": "ContentResolver query on content://com.android.contacts/data", "file": "com/photovault/secure/Exfil.java", "weight": 8 },
+    { "rule_id": "CODE_DEVICE_ID_HARVEST", "evidence": "telephonyManager.getDeviceId() called in onCreate", "file": "com/photovault/secure/MainActivity.java", "weight": 6 }
+  ],
+  "iocs": {
+    "domains": ["185.220.101.47", "c2-panel.photovault-cdn.net"],
+    "ips": ["185.220.101.47", "10.0.0.1"],
+    "urls": ["http://185.220.101.47/collect", "http://185.220.101.47/cmd"],
+    "phones": ["+15550199"],
+    "base64_blobs": ["SGVsbG8gV29ybGQgZW5jcnlwdGVk"]
+  },
+  "embedded_payloads": {
+    "nested_apk": true,
+    "nested_dex": false,
+    "nested_elf": false
+  },
+  "triggers": [
+    { "rule_id": "PERM_SMS_INTERCEPTION_COMBO", "description": "READ_SMS + RECEIVE_SMS + SEND_SMS together = OTP interception capability", "weight": 30, "evidence": "All three SMS permissions declared" },
+    { "rule_id": "PERM_ACCESSIBILITY", "description": "Accessibility service abuse — can read screen content & capture credentials", "weight": 20, "evidence": "BIND_ACCESSIBILITY_SERVICE declared" },
+    { "rule_id": "PERM_DROPPER", "description": "Can install other packages — dropper/stager behavior", "weight": 18, "evidence": "REQUEST_INSTALL_PACKAGES declared" },
+    { "rule_id": "PERM_OVERLAY", "description": "Draw-over-apps — overlay phishing attacks on login screens", "weight": 12, "evidence": "SYSTEM_ALERT_WINDOW declared" },
+    { "rule_id": "CODE_SMS_ABORT", "description": "Silently deletes incoming SMS — classic OTP-stealing behavior", "weight": 22, "evidence": "abortBroadcast() in SmsInterceptor" },
+    { "rule_id": "CODE_DYNAMIC_LOADING", "description": "Loads executable code at runtime — hides real payload from scanners", "weight": 18, "evidence": "DexClassLoader in PayloadLoader.java" },
+    { "rule_id": "META_DEBUG_SIGNED", "description": "Signed with debug certificate", "weight": 10, "evidence": "CN=Android Debug in cert subject" },
+    { "rule_id": "META_NESTED_APK", "description": "Contains another APK inside assets — multi-stage dropper", "weight": 20, "evidence": "payload.apk found in assets/" }
+  ],
+  "ai_analysis": {
+    "fraud_category": "banking_trojan",
+    "confidence": "high",
+    "behavior_summary": "PhotoVault masquerades as a photo storage utility but operates as a sophisticated banking trojan. It silently intercepts all incoming SMS messages to steal OTP codes, overlays phishing screens on top of legitimate banking apps to capture credentials, and exfiltrates harvested data to a hardcoded C2 server. A nested APK dropper component enables second-stage payload delivery.",
+    "attack_chain": [
+      { "step": 1, "title": "Delivery", "detail": "APK distributed via phishing SMS or WhatsApp message disguised as a photo app update", "evidence": ["MainActivity.java"] },
+      { "step": 2, "title": "Persistence", "detail": "Registers RECEIVE_BOOT_COMPLETED receiver to restart on device reboot", "evidence": ["AndroidManifest.xml: RECEIVE_BOOT_COMPLETED"] },
+      { "step": 3, "title": "OTP Interception", "detail": "SmsInterceptor.onReceive() calls abortBroadcast() to silently delete SMS before victim sees it, then forwards content to C2", "evidence": ["SmsInterceptor.java: abortBroadcast()", "SmsInterceptor.java: POST to 185.220.101.47/collect"] },
+      { "step": 4, "title": "Credential Overlay Phishing", "detail": "AccessibilityOverlayService monitors foreground app; when banking apps are detected, draws a full-screen overlay via SYSTEM_ALERT_WINDOW to phish credentials", "evidence": ["AccessibilityOverlayService.java", "BIND_ACCESSIBILITY_SERVICE permission"] },
+      { "step": 5, "title": "Data Exfiltration", "detail": "Harvested OTPs, contact list, and device ID are AES-encrypted and POSTed to the C2 panel", "evidence": ["Config.java: AES/CBC decryption", "Exfil.java: contact enumeration"] },
+      { "step": 6, "title": "Second-Stage Drop", "detail": "DexClassLoader loads a secondary payload from assets/payload.apk at runtime, enabling updates without reinstall", "evidence": ["PayloadLoader.java: DexClassLoader"] }
+    ],
+    "iocs": {
+      "domains": ["c2-panel.photovault-cdn.net"],
+      "ips": ["185.220.101.47"],
+      "urls": ["http://185.220.101.47/collect", "http://185.220.101.47/cmd"],
+      "phone_numbers": ["+15550199"],
+      "package_names": ["com.photovault.secure"]
+    },
+    "mitre_techniques": [
+      { "id": "T1412", "name": "Capture SMS Messages", "reason": "Intercepts and silently deletes incoming SMS to steal OTP codes" },
+      { "id": "T1417", "name": "Input Capture", "reason": "Accessibility service used to capture keystrokes and screen content in banking apps" },
+      { "id": "T1627", "name": "Execution Guardrails", "reason": "AES-encrypted C2 config decoded at runtime to evade static analysis" },
+      { "id": "T1544", "name": "Ingress Tool Transfer", "reason": "DexClassLoader drops and executes secondary payload from assets" },
+      { "id": "T1582", "name": "SMS Control", "reason": "Sends exfiltrated data via HTTP POST to C2 infrastructure" }
+    ],
+    "recommendations": [
+      "Block SHA-256 hash at email/SMS gateway immediately",
+      "Notify all customers who received the distribution link",
+      "Flag C2 domain c2-panel.photovault-cdn.net and IP 185.220.101.47 at firewall/proxy",
+      "Alert customers who may have installed the app to reset banking passwords and OTP secrets",
+      "Report package com.photovault.secure to Google Play Protect for cross-device blocking"
+    ]
+  },
+  "report_markdown": "# Threat Investigation Report — PhotoVault\n**Verdict:** 🔴 CRITICAL (87/100) · banking_trojan · Confidence: high\n**SHA-256:** `a3f5c8e2d1b4f7a9c0e3b6d8f1a4c7e0b2d5f8a1c4e7f0b3d6a9c2e5f8b1d4`\n**Analyzed:** 2026-08-21 14:02 UTC\n\n## Executive Summary\nPhotoVault masquerades as a photo storage utility but operates as a sophisticated banking trojan. It silently intercepts all incoming SMS messages to steal OTP codes, overlays phishing screens on top of legitimate banking apps to capture credentials, and exfiltrates harvested data to a hardcoded C2 server.\n\n## Attack Chain\n1. **Delivery** — APK distributed via phishing SMS\n2. **Persistence** — RECEIVE_BOOT_COMPLETED for reboot survival\n3. **OTP Interception** — abortBroadcast() silently deletes SMS\n4. **Credential Overlay** — SYSTEM_ALERT_WINDOW phishing overlay\n5. **Exfiltration** — AES-encrypted POST to 185.220.101.47/collect\n6. **Second-Stage Drop** — DexClassLoader loads payload.apk\n\n## Risk Score Breakdown\n| Triggered Rule | Evidence | Points |\n|---|---|---|\n| SMS Interception Combo | READ+RECEIVE+SEND_SMS | +30 |\n| Accessibility Service | BIND_ACCESSIBILITY_SERVICE | +20 |\n| Nested APK Dropper | assets/payload.apk | +20 |\n| Dropper Permission | REQUEST_INSTALL_PACKAGES | +18 |\n\n## Recommended Actions\n- Block hash at email/SMS gateway\n- Notify affected customers immediately\n- Flag C2 infrastructure at firewall\n"
+}
