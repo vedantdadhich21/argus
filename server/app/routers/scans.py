@@ -142,8 +142,53 @@ async def get_scan(scan_id: str, db: Session = Depends(get_db)):
     return _build_completed_response(scan)
 
 
+def _rescore_scan(scan: Scan) -> tuple:
+    """
+    Re-evaluate the scan using the CURRENT rules_engine.
+    Returns (rule_score, severity, triggers, all_hits) computed live.
+    This ensures any scoring calibration changes take effect immediately
+    on all existing DB rows without needing manual patches or cache clears.
+    """
+    import json as _j
+    from app.services import rules_engine as _re
+
+    def _load(f):
+        try: return _j.loads(f) if f else ([] if isinstance(f, str) else {})
+        except: return []
+
+    all_hits_raw = _load(scan.pattern_hits) or []
+
+    try:
+        _re._ensure_loaded()
+        code_ids  = {r["id"] for r in _re._RULES.get("code_rules", [])}
+        code_hits = [h for h in all_hits_raw if h.get("rule_id", "") in code_ids]
+
+        result = _re.score(
+            permissions       = _load(scan.permissions) or [],
+            pattern_hits      = code_hits,
+            iocs              = _load(scan.iocs) or {},
+            manifest_flags    = _load(scan.manifest_flags) or {},
+            certificate       = _load(scan.certificate) or {},
+            embedded_payloads = _load(scan.embedded_payloads) or {},
+            app_metadata      = _load(scan.app_metadata) or {},
+            decompiled_available = bool(code_hits),
+        )
+        from app.services.pipeline import _merge_hits_and_triggers
+        fresh_hits = _merge_hits_and_triggers(code_hits, result["triggers"])
+        return result["rule_score"], result["severity"], result["triggers"], fresh_hits
+
+    except Exception as exc:
+        logger.warning("Live rescore failed for scan %s: %s", scan.id, exc)
+        triggers = [h for h in all_hits_raw if "rule_id" in h]
+        return scan.rule_score, scan.severity, triggers, all_hits_raw
+
+
 def _build_completed_response(scan: Scan) -> ScanCompletedResponse:
-    """Deserialize all JSON text columns into the full response schema."""
+    """
+    Deserialize all JSON text columns into the full response schema.
+    Always re-scores with the current rules_engine so calibration changes
+    take effect immediately on all cached results.
+    """
 
     def _load(field) -> Optional[dict | list]:
         if field is None:
@@ -153,9 +198,8 @@ def _build_completed_response(scan: Scan) -> ScanCompletedResponse:
         except Exception:
             return None
 
-    # Separate triggers from pattern_hits (pattern_hits was merged with triggers in pipeline)
-    all_hits = _load(scan.pattern_hits) or []
-    triggers = [h for h in all_hits if "rule_id" in h]
+    # Always re-score live with current rules — no stale DB scores shown
+    live_score, live_severity, live_triggers, all_hits = _rescore_scan(scan)
 
     return ScanCompletedResponse(
         scan_id          = scan.id,
@@ -173,13 +217,13 @@ def _build_completed_response(scan: Scan) -> ScanCompletedResponse:
         pattern_hits     = all_hits,
         iocs             = _load(scan.iocs),
         embedded_payloads= _load(scan.embedded_payloads),
-        rule_score       = scan.rule_score,
-        final_score      = scan.final_score,
-        severity         = scan.severity,
+        rule_score       = live_score,
+        final_score      = live_score,
+        severity         = live_severity,
         fraud_category   = scan.fraud_category,
         ai_status        = scan.ai_status,
         ai_analysis      = _load(scan.ai_analysis),
-        triggers         = triggers,
+        triggers         = live_triggers,
         report_markdown  = scan.report_markdown,
         error_message    = scan.error_message,
         duration_ms      = scan.duration_ms,
