@@ -20,19 +20,22 @@ Keep entries ≤ 15 lines. Link to commits where useful. Checkpoint merges (CP1/
 
 ## Entries
 
+### [Checkpoint 2 · All] Merged c/frontend into main: Native Android Scanner App + Live Groq AI + PDF Reports — main
+- Did: Merged Person C's Android Sentinel Shield client (`Models.kt`, `SentinelClient.kt`, `InstallHandoff.kt`, `Screens.kt`, Compose RYG verdict UI, and `usesCleartextTraffic`) into `main`. Unified dashboard with live PDF report export and offline degradation banners.
+- Verification: `./gradlew assembleDebug` builds clean APK in ~18s. `npm run build` succeeds with 0 errors. All 9 automated backend tests in `smoke.sh` pass with live Groq LLM inference.
+- Next: Block 4 Deployment & demo rehearsal.
+
+### [H+8.0h · Block 2/3] Person C — c/frontend
+- Did: Complete Android Sentinel Shield app built in `android/` (`Models.kt`, `SentinelClient.kt`, `InstallHandoff.kt`, `Screens.kt`, updated `MainActivity.kt`, enabled `usesCleartextTraffic`). Enhanced Web Dashboard in `client/` (`ScanDetail.jsx` AI degradation banner, IOC copy cells, history filters).
+- How: Native HTTP client streams APK multipart and calculates SHA-256/MD5 for fast-path hash check (`POST /api/lookup/hash`). Full Jetpack Compose RYG VerdictScreen with install handoff for safe APKs and block actions for critical/banking malware.
+- Gotchas: Added `android:usesCleartextTraffic="true"` for LAN/IP testing; `local.properties` configured for Windows Android SDK. Verified `./gradlew assembleDebug` (21s) and `npm run build` both build clean.
+- Next: Checkpoint 2 (CP2) full end-to-end integration testing with backend on LAN/WiFi.
+
 ### [Block 2/3 · A+B] Created demo APKs (fake_banker & benign_notes), PDF export, framework false positive filter — main
 - Did: Built two dedicated demo APK modules in `android/samples/`: `fake_banker.apk` (SMS intercept, abortBroadcast, DexClassLoader, Accessibility, Overlay, nested payload) and `benign_notes.apk` (clean single-permission note app). Added ReportLab-based PDF report generation in `report_generator.py` and `GET /api/scan/{id}/report?format=pdf`. Added PDF export button in UI.
 - How: Fixed nested DEX check in `static_analysis.py` (only flags DEX inside `assets/` or `res/`, not root `classes.dex`). Fixed `pattern_scanner.py` and `method_selector.py` to filter AndroidX/framework library classes so innocent apps aren't false-positived by AndroidX internal code.
 - Verification: `fake_banker.apk` scores **100 (CRITICAL)** in ~17s; `benign_notes.apk` scores **16 (LOW/SAFE)** in ~18s. All 9 automated tests in `smoke.sh` pass including PDF export validation.
 - Next: Checkpoint 2 testing with Android client. Set `LLM_API_KEY` in `server/.env` whenever live LLM inference is needed.
-- Did: Merged `origin/c/frontend` into `main`. Verified client dependencies install and build (`npm run build` generates clean dist bundle). Updated `useScan.js` and `ScanDetail.jsx` to poll across all 8 pipeline stage statuses. Built `server/scripts/smoke.sh` E2E test suite, `server/Dockerfile`, and `docker-compose.yml`.
-- How: All 8 smoke tests passed end-to-end against live backend: Health check, Stats, APK upload, polling state machine, hash cache lookup, scan history, report download, and 415 rejection.
-- Gotchas: In `useScan.js` and `ScanDetail.jsx`, `WORKING_STATUSES` was missing intermediate stage names (`pattern_scanning`, `ioc_extraction`, `scoring`, `building_report`) which caused polling to stop prematurely — now updated.
-- Next: Checkpoint 1 complete. Block 3 Android native scanner app & physical device testing.
-- Did: cherry-picked B's `ai_analyst.py`, `method_selector.py`, `report_generator.py`, fixtures (`SmsReceiver.java`, `PayloadLoader.java`, `CryptoHelper.java`, `KeyloggerService.java`, `OverlayService.java`, `ContactHarvester.java`), `scripts/test_llm.py` into `main`. Updated `pipeline.py` stages 7–8 to call B's actual class-based APIs (`AiAnalyst.analyze()`, `ReportGenerator.build_markdown_report()`).
-- How: B uses class instances not module-level functions. `AiAnalyst.analyze()` takes `(scan_id, package_name, permissions: List[str], triggered_rules, static_iocs, methods)`. `ReportGenerator.build_markdown_report()` takes 17 named args. Pipeline flattens permission dicts to strings before passing. Report is saved to disk at `storage/reports/<scan_id>_report.md` and returned via API.
-- Gotchas: (1) Missing `import os` and `from app.services.storage import get_decompiled_dir` in pipeline stage 7–8 block — now fixed. (2) `ai_status: unavailable` is correct behavior when no `LLM_API_KEY` in `.env` — B's heuristic fallback produces a valid schema but `analyze()` returns `None` without a key (by design). (3) jadx exits code 3 on our debug APK (partial output) — gracefully handled, pattern scan still runs.
-- Next: CP1 ready. Person C flips `VITE_USE_MOCKS=false`, uploads `fake_banker.apk` (B's job to build), confirm CRITICAL verdict + report download works on real dashboard. Server: `uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload` for LAN access.
 
 ### [H+3.5h · Block 1] Person C — c/frontend
 - Did: Full dashboard scaffolded in `client/` (Vite, React 18, Tailwind CSS, TanStack Query v5, Axios, React Router v6). Built all pages (Home, ScanDetail, History, ApiDocs) & components (Dropzone, RiskGauge, VerdictCard, PipelineStatus, ScoreBreakdown, PermissionTable, AttackChain, IocTable, MitreList, AiFindings).
