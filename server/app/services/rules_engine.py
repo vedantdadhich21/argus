@@ -68,6 +68,34 @@ def _ensure_loaded():
 # Public API
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Rules that are always self-sufficient (count at full weight even without
+# any high-risk permission hit). These have no false-positive equivalent in
+# a legitimate app.
+# ---------------------------------------------------------------------------
+_SELF_SUFFICIENT_CODE_RULES = {
+    "CODE_SMS_ABORT",    # abortBroadcast() — no legitimate app silently deletes SMS
+    "CODE_FORWARD_SMS",  # SmsManager.sendTextMessage in non-SMS app = OTP exfiltration
+    "CODE_EXEC",         # Runtime.exec() — shell execution is almost always malicious
+}
+
+# High-risk permission rule IDs — if ANY of these fire, code+IOC rules count
+# at full weight. If none fire, code+IOC rules are dampened (combo-gating).
+_HIGH_RISK_PERM_RULE_IDS = {
+    "PERM_SMS_INTERCEPTION_COMBO",
+    "PERM_ACCESSIBILITY",
+    "PERM_OVERLAY",
+    "PERM_DROPPER",
+    "PERM_DEVICE_ADMIN",
+}
+
+# Damping factor applied to code+IOC weights when no high-risk permission
+# rule fires. This prevents large feature-rich apps (shopping, social)
+# from scoring CRITICAL purely because they use many SDKs with reflection,
+# clipboard access, or camera APIs.
+_CODE_IOC_DAMPING_FACTOR = 0.30
+
+
 def score(
     permissions: List[Dict[str, Any]],
     pattern_hits: List[Dict[str, Any]],
@@ -81,53 +109,82 @@ def score(
     """
     Evaluate all rules and compute the risk score.
 
+    **Combo-gated scoring**: Code and IOC signals only count at full weight
+    when at least one high-risk permission rule is also triggered. Without
+    a dangerous permission anchor, code/IOC signals are dampened to
+    _CODE_IOC_DAMPING_FACTOR (30%) — they still appear in the trigger list
+    so analysts can see them, but don't inflate the score to CRITICAL for
+    large feature-rich apps that use common SDKs.
+
+    Self-sufficient rules (CODE_SMS_ABORT, CODE_FORWARD_SMS, CODE_EXEC)
+    always count at full weight regardless — no legitimate app ever
+    silently aborts SMS broadcasts or executes shell commands.
+
     Returns:
         {
             "rule_score": int (0–100),
             "severity": str,
-            "triggers": [{rule_id, description, weight, evidence}],
+            "triggers": [{rule_id, description, weight, evidence, dampened}],
         }
     """
     _ensure_loaded()
 
     triggers: List[Dict[str, Any]] = []
-    total_weight = 0
+    perm_weight = 0
+    code_ioc_weight = 0
+    metadata_weight = 0
 
     # ---- Permission rules ------------------------------------------------
     perm_names = {p["name"] for p in (permissions or [])}
+    triggered_perm_rule_ids: set = set()
+
     for rule in _RULES.get("permission_rules", []):
         triggered, evidence = _eval_permission_rule(rule, perm_names, manifest_flags)
         if triggered:
             triggers.append(_make_trigger(rule, evidence))
-            total_weight += rule["weight"]
+            perm_weight += rule["weight"]
+            triggered_perm_rule_ids.add(rule["id"])
+
+    # Determine whether any HIGH-RISK permission rule fired
+    has_high_risk_perm = bool(triggered_perm_rule_ids & _HIGH_RISK_PERM_RULE_IDS)
 
     # ---- Code rules (from pattern_hits already computed) -----------------
     if decompiled_available:
-        # pattern_hits already contains only matched rules; just aggregate by rule_id
         code_rule_ids = {r["id"]: r for r in _RULES.get("code_rules", [])}
         for hit in (pattern_hits or []):
             rule_id = hit.get("rule_id")
             if rule_id and rule_id in code_rule_ids:
+                raw_weight = hit.get("weight", 0)
+                is_self_sufficient = rule_id in _SELF_SUFFICIENT_CODE_RULES
+                dampened = not has_high_risk_perm and not is_self_sufficient
+                effective_weight = raw_weight if (has_high_risk_perm or is_self_sufficient) else int(raw_weight * _CODE_IOC_DAMPING_FACTOR)
                 triggers.append({
                     "rule_id": rule_id,
                     "description": hit.get("description", code_rule_ids[rule_id].get("description", "")),
-                    "weight": hit.get("weight", 0),
+                    "weight": raw_weight,
+                    "effective_weight": effective_weight,
                     "evidence": hit.get("evidence", ""),
+                    "dampened": dampened,
                 })
-                total_weight += hit.get("weight", 0)
+                code_ioc_weight += effective_weight
     else:
         logger.info("Decompilation unavailable — code rules skipped")
 
     # ---- IOC rules -------------------------------------------------------
     all_ioc_text = _flatten_iocs(iocs)
-    ioc_rule_counts: Dict[str, int] = {}
     for rule in _RULES.get("ioc_rules", []):
         triggered, evidence, count = _eval_ioc_rule(rule, all_ioc_text)
         if triggered:
             max_apply = rule.get("max_applications", 1)
             apply_times = min(count, max_apply)
-            triggers.append(_make_trigger(rule, evidence))
-            total_weight += rule["weight"] * apply_times
+            raw_weight = rule["weight"] * apply_times
+            dampened = not has_high_risk_perm
+            effective_weight = raw_weight if has_high_risk_perm else int(raw_weight * _CODE_IOC_DAMPING_FACTOR)
+            t = _make_trigger(rule, evidence)
+            t["effective_weight"] = effective_weight
+            t["dampened"] = dampened
+            triggers.append(t)
+            code_ioc_weight += effective_weight
 
     # ---- Metadata rules --------------------------------------------------
     for rule in _RULES.get("metadata_rules", []):
@@ -135,16 +192,21 @@ def score(
             rule, certificate, embedded_payloads, app_metadata
         )
         if triggered:
-            triggers.append(_make_trigger(rule, evidence))
-            total_weight += rule["weight"]
+            t = _make_trigger(rule, evidence)
+            t["dampened"] = False
+            triggers.append(t)
+            metadata_weight += rule["weight"]
 
-    # ---- Cap and classify ------------------------------------------------
+    # ---- Final score: perm + code_ioc (combo-gated) + metadata -----------
+    total_weight = perm_weight + code_ioc_weight + metadata_weight
     rule_score = min(total_weight, 100)
     severity = _score_to_severity(rule_score)
 
     logger.info(
-        "Rules engine: score=%d severity=%s triggers=%d",
-        rule_score, severity, len(triggers)
+        "Rules engine: score=%d severity=%s triggers=%d "
+        "(perm=%d code_ioc=%d meta=%d high_risk_perm=%s)",
+        rule_score, severity, len(triggers),
+        perm_weight, code_ioc_weight, metadata_weight, has_high_risk_perm
     )
 
     return {

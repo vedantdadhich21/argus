@@ -162,8 +162,8 @@ metadata_rules:
 
   - id: META_SELF_SIGNED
     condition: "cert.self_signed == true"
-    description: "Self-signed certificate — no app store accountability"
-    weight: 6
+    description: "Self-signed certificate — no app store accountability (indicator only; combined with other signals becomes significant)"
+    weight: 3
 
   - id: META_NESTED_APK
     condition: "payloads.nested_apk == true"
