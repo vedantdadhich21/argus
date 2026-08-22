@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Env & secrets
+.env
+
+# Databases
+*.db
+
+# Runtime artifacts (uploads, decompiled trees, reports, LLM raw dumps)
+server/storage/
+
+# Malware-like samples — never commit binaries
+server/samples/*.apk
+
+# Node
+node_modules/
+dist/
+
+# Android / IntelliJ — generated & cached, never commit
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties/
+.idea/
+*.iml
+captures/
+.externalNativeBuild/
+.cxx/
+
+# OS noise
+.DS_Store
