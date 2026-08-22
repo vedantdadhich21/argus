@@ -20,6 +20,12 @@ Keep entries ≤ 15 lines. Link to commits where useful. Checkpoint merges (CP1/
 
 ## Entries
 
+### [H+3.5h · Block 1] Person C — c/frontend
+- Did: Full dashboard scaffolded in `client/` (Vite, React 18, Tailwind CSS, TanStack Query v5, Axios, React Router v6). Built all pages (Home, ScanDetail, History, ApiDocs) & components (Dropzone, RiskGauge, VerdictCard, PipelineStatus, ScoreBreakdown, PermissionTable, AttackChain, IocTable, MitreList, AiFindings).
+- How: Mapped against frozen fixture `client/src/mocks/scanResponse.json` (§11). `VITE_USE_MOCKS=true` simulates artificial pipeline delays without needing backend.
+- Gotchas: Node.js PATH issue on Windows resolved by user-level PATH setx; production build verified clean via `npm run build`.
+- Next: Block 2 (History + stats mock polish) → Checkpoint 1 integration.
+
 ### [Pre-hackathon · Block 0] ✅ RISK SPIKE PASSED — main
 - Did: tested on physical device (Nothing A015, wireless debugging). Tapped a real .apk in Files app → chooser offered "Sentinel Shield" → Logcat `tag:Sentinel` shows full chain: `intercepted URI: content://com.google.android.apps.nbu.files.provider/…` → `read 17534594 bytes` (= exactly 17.53 MB decimal, matches file listing) → `zip magic=[80, 75]`. Interception + ContentResolver streaming both confirmed.
 - How: §14 manifest filter registered first try; no fallback needed — native phone flow is GO for Block 3. Byte count matching the visible file size doubles as a read-integrity check.
