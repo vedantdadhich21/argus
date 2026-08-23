@@ -76,12 +76,13 @@ def run(apk_path: str) -> Dict[str, Any]:
     }
 
     try:
-        from androguard.misc import AnalyzeAPK
-        a, d, dx = AnalyzeAPK(apk_path)
+        from androguard.core.bytecodes.apk import APK
+        a = APK(apk_path)
     except Exception as exc:
         logger.error("Androguard failed to parse APK: %s", exc)
         result["error"] = str(exc)
         return result
+
 
     try:
         # ----------------------------------------------------------------
