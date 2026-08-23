@@ -42,17 +42,22 @@ def run(scan_id: str, apk_path: str) -> bool:
 
     # Strict low-memory settings to never exceed 512MB container limits
     env = os.environ.copy()
-    env["JAVA_OPTS"] = "-Xmx256m -Xms64m -XX:+UseSerialGC"
-    env["JADX_OPTS"] = "-Xmx256m"
+    env["JAVA_TOOL_OPTIONS"] = "-Xmx192m -Xms32m -XX:MaxMetaspaceSize=64m -XX:+UseSerialGC"
+    env["JAVA_OPTS"] = "-Xmx192m -Xms32m -XX:MaxMetaspaceSize=64m -XX:+UseSerialGC"
+    env["JADX_OPTS"] = "-Xmx192m"
 
     cmd = [
         jadx_bin,
         "--output-dir", output_dir,
-        "--no-res",          # skip resources, only sources — much faster
-        "--no-imports",      # skip import lines to conserve memory
-        "--threads-count", "1", # single-threaded parsing to stay below 256MB heap
+        "--no-res",              # skip resources, only sources
+        "--no-imports",          # skip import lines to conserve memory
+        "--no-replace-consts",   # avoid expensive const analysis graphs
+        "--no-inline-anonymous", # avoid inlining anonymous classes
+        "--show-bad-code",       # don't backtrack on decompilation errors
+        "--threads-count", "1",  # single-threaded parsing
         apk_path,
     ]
+
 
     logger.info("Starting jadx decompilation for scan %s (timeout=%ds)", scan_id, _JADX_TIMEOUT)
 
