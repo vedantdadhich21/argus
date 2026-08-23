@@ -213,24 +213,12 @@ class MainActivity : ComponentActivity() {
         val scanId = client.uploadApk(this, uri, fileName)
 
         if (scanId == null) {
-            // If offline/connection refused, generate safe fallback demonstration verdict
-            Log.w(TAG, "Backend unreachable, using offline security heuristic")
-            val fallbackVerdict = ScanDetailResponse(
-                scanId = "offline_${System.currentTimeMillis()}",
-                status = "completed",
-                severity = "HIGH",
-                finalScore = 72,
-                fraudCategory = "sms_otp_stealer",
-                triggers = listOf(
-                    TriggerItem("OFFLINE_HEURISTIC", "Interception intent verified. Unregistered third-party origin.", 40),
-                    TriggerItem("UNVERIFIED_CERTIFICATE", "Application package is not distributed via Play Store.", 32)
-                ),
-                behaviorSummary = "Argus intercepted this sideloaded application before installation."
-            )
-            addToHistory(fileName, fallbackVerdict)
-            uiState = ScreenState.Verdict(fallbackVerdict, uri)
+            Log.e(TAG, "Backend unreachable at ${client.getBaseUrl()}")
+            Toast.makeText(this, "Failed to connect to ${client.getBaseUrl()}. Check engine URL.", Toast.LENGTH_LONG).show()
+            uiState = ScreenState.Standby
             return
         }
+
 
         // 3. Poll Scan Status (up to 5 minutes / 300s window)
         var attempts = 0

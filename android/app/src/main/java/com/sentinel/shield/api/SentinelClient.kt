@@ -39,18 +39,21 @@ class SentinelClient(private var baseUrl: String = DEFAULT_BASE_URL) {
     }
 
     fun setBaseUrl(url: String) {
-        baseUrl = url.trimEnd('/')
+        baseUrl = url.trim().trimEnd('/')
     }
 
-    fun getBaseUrl(): String = baseUrl
+    fun getBaseUrl(): String = baseUrl.trim().trimEnd('/')
 
     suspend fun lookupHash(sha256: String, md5: String? = null): HashLookupResponse = withContext(Dispatchers.IO) {
-        val url = URL("$baseUrl/api/lookup/hash")
+        val cleanUrl = baseUrl.trim().trimEnd('/')
+        val url = URL("$cleanUrl/api/lookup/hash")
         val conn = (url.openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             connectTimeout = CONNECT_TIMEOUT_MS
             readTimeout = READ_TIMEOUT_MS
             setRequestProperty("Content-Type", "application/json; charset=UTF-8")
+            setRequestProperty("Accept", "application/json")
+            setRequestProperty("ngrok-skip-browser-warning", "true")
             doOutput = true
         }
 
@@ -88,7 +91,8 @@ class SentinelClient(private var baseUrl: String = DEFAULT_BASE_URL) {
                 "Content-Type: application/vnd.android.package-archive" + lineEnd + lineEnd).toByteArray(Charsets.UTF_8)
         val footerBytes = (lineEnd + twoHyphens + boundary + twoHyphens + lineEnd).toByteArray(Charsets.UTF_8)
 
-        val url = URL("$baseUrl/api/scan")
+        val cleanUrl = baseUrl.trim().trimEnd('/')
+        val url = URL("$cleanUrl/api/scan")
         val conn = (url.openConnection() as HttpURLConnection).apply {
             requestMethod = "POST"
             connectTimeout = CONNECT_TIMEOUT_MS
@@ -96,12 +100,26 @@ class SentinelClient(private var baseUrl: String = DEFAULT_BASE_URL) {
             doInput = true
             doOutput = true
             useCaches = false
-            setChunkedStreamingMode(65536)
             setRequestProperty("Connection", "Keep-Alive")
             setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
+            setRequestProperty("Accept", "application/json")
+            setRequestProperty("ngrok-skip-browser-warning", "true")
         }
 
         try {
+            val fileSize = try {
+                context.contentResolver.openAssetFileDescriptor(uri, "r")?.use { it.length } ?: -1L
+            } catch (e: Exception) {
+                -1L
+            }
+
+            if (fileSize > 0) {
+                val totalLength = headerBytes.size + fileSize + footerBytes.size
+                conn.setFixedLengthStreamingMode(totalLength)
+            } else {
+                conn.setChunkedStreamingMode(65536)
+            }
+
             conn.outputStream.use { os ->
                 os.write(headerBytes)
                 context.contentResolver.openInputStream(uri)?.use { inputStream ->
@@ -135,11 +153,14 @@ class SentinelClient(private var baseUrl: String = DEFAULT_BASE_URL) {
     }
 
     suspend fun pollScan(scanId: String): ScanDetailResponse = withContext(Dispatchers.IO) {
-        val url = URL("$baseUrl/api/scan/$scanId")
+        val cleanUrl = baseUrl.trim().trimEnd('/')
+        val url = URL("$cleanUrl/api/scan/$scanId")
         val conn = (url.openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
             connectTimeout = CONNECT_TIMEOUT_MS
             readTimeout = READ_TIMEOUT_MS
+            setRequestProperty("Accept", "application/json")
+            setRequestProperty("ngrok-skip-browser-warning", "true")
         }
 
         try {
@@ -157,6 +178,7 @@ class SentinelClient(private var baseUrl: String = DEFAULT_BASE_URL) {
             conn.disconnect()
         }
     }
+
 
 
     suspend fun fetchRecentScans(): List<ScanHistoryItem> = withContext(Dispatchers.IO) {
