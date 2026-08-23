@@ -40,11 +40,17 @@ def run(scan_id: str, apk_path: str) -> bool:
         logger.warning("jadx not found at '%s' — skipping decompilation for scan %s", jadx_bin, scan_id)
         return False
 
+    # Strict low-memory settings to never exceed 512MB container limits
+    env = os.environ.copy()
+    env["JAVA_OPTS"] = "-Xmx256m -Xms64m -XX:+UseSerialGC"
+    env["JADX_OPTS"] = "-Xmx256m"
+
     cmd = [
         jadx_bin,
         "--output-dir", output_dir,
         "--no-res",          # skip resources, only sources — much faster
-        "--threads-count", "4",
+        "--no-imports",      # skip import lines to conserve memory
+        "--threads-count", "1", # single-threaded parsing to stay below 256MB heap
         apk_path,
     ]
 
@@ -53,10 +59,12 @@ def run(scan_id: str, apk_path: str) -> bool:
     try:
         result = subprocess.run(
             cmd,
+            env=env,
             capture_output=True,
             text=True,
             timeout=_JADX_TIMEOUT,
         )
+
         if result.returncode != 0:
             logger.warning(
                 "jadx returned non-zero exit code %d for scan %s: %s",

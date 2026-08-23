@@ -40,5 +40,8 @@ ENV PORT=8000
 ENV DATABASE_URL=sqlite:///./storage/sentinel.db
 ENV STORAGE_DIR=./storage
 ENV JADX_PATH=jadx
+ENV JAVA_OPTS="-Xmx256m -Xms64m -XX:+UseSerialGC"
+ENV JADX_OPTS="-Xmx256m"
 
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+
