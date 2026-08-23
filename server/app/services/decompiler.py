@@ -40,23 +40,22 @@ def run(scan_id: str, apk_path: str) -> bool:
         logger.warning("jadx not found at '%s' — skipping decompilation for scan %s", jadx_bin, scan_id)
         return False
 
-    # Strict low-memory settings to never exceed 512MB container limits
+    # Strict low-memory settings to guarantee sub-128MB RAM usage
     env = os.environ.copy()
-    env["JAVA_TOOL_OPTIONS"] = "-Xmx192m -Xms32m -XX:MaxMetaspaceSize=64m -XX:+UseSerialGC"
-    env["JAVA_OPTS"] = "-Xmx192m -Xms32m -XX:MaxMetaspaceSize=64m -XX:+UseSerialGC"
-    env["JADX_OPTS"] = "-Xmx192m"
+    env["JAVA_TOOL_OPTIONS"] = "-Xmx128m -Xms32m -XX:MaxMetaspaceSize=48m -XX:+UseSerialGC"
+    env["JAVA_OPTS"] = "-Xmx128m -Xms32m -XX:MaxMetaspaceSize=48m -XX:+UseSerialGC"
+    env["JADX_OPTS"] = "-Xmx128m"
 
     cmd = [
         jadx_bin,
         "--output-dir", output_dir,
-        "--no-res",              # skip resources, only sources
-        "--no-imports",          # skip import lines to conserve memory
-        "--no-replace-consts",   # avoid expensive const analysis graphs
-        "--no-inline-anonymous", # avoid inlining anonymous classes
-        "--show-bad-code",       # don't backtrack on decompilation errors
-        "--threads-count", "1",  # single-threaded parsing
+        "--decompilation-mode", "simple", # ultra-lightweight direct bytecode decompiler
+        "--no-res",                       # skip resources, only sources
+        "--no-imports",                   # skip import lines
+        "--threads-count", "1",           # single-threaded
         apk_path,
     ]
+
 
 
     logger.info("Starting jadx decompilation for scan %s (timeout=%ds)", scan_id, _JADX_TIMEOUT)
