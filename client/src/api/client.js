@@ -5,7 +5,11 @@ const API_BASE  = import.meta.env.VITE_API_BASE  || 'http://localhost:8000'
 
 export const api = axios.create({
   baseURL: USE_MOCKS ? '' : API_BASE,
-  timeout: 30_000,
+  timeout: 60_000,
+  headers: {
+    'ngrok-skip-browser-warning': 'true',
+  },
 })
+
 
 export { USE_MOCKS }
