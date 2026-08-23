@@ -115,6 +115,3 @@ def get_java_files(scan_id: str) -> List[str]:
     except Exception:
         pass
     return java_files
-
-
-
