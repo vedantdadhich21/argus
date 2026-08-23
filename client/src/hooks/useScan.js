@@ -34,7 +34,10 @@ export function useScan(scanId) {
         ? fetchMockScan()
         : api.get(`/api/scan/${scanId}`).then(r => r.data),
     refetchInterval: (query) =>
-      WORKING_STATUSES.includes(query.state.data?.status) ? 2000 : false,
+      WORKING_STATUSES.includes(query.state.data?.status) ? 2500 : false,
+    retry: 5,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
     enabled: !!scanId,
   })
 }
+

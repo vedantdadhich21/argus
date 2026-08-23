@@ -232,9 +232,9 @@ class MainActivity : ComponentActivity() {
             return
         }
 
-        // 3. Poll Scan Status
+        // 3. Poll Scan Status (up to 5 minutes / 300s window)
         var attempts = 0
-        val maxAttempts = 60 // up to 120s for deep jadx decompilation and AI analysis
+        val maxAttempts = 150 
         var consecutiveNetworkErrors = 0
 
         while (attempts < maxAttempts) {
@@ -252,8 +252,8 @@ class MainActivity : ComponentActivity() {
                 return
             } else if (scan.status == "network_error") {
                 consecutiveNetworkErrors++
-                Log.w(TAG, "Transient network error ($consecutiveNetworkErrors/6)")
-                if (consecutiveNetworkErrors >= 6) {
+                Log.w(TAG, "Transient network error ($consecutiveNetworkErrors/15)")
+                if (consecutiveNetworkErrors >= 15) {
                     Toast.makeText(this, "Connection lost to threat engine", Toast.LENGTH_SHORT).show()
                     uiState = ScreenState.Standby
                     return
@@ -265,6 +265,7 @@ class MainActivity : ComponentActivity() {
             }
             attempts++
         }
+
 
         Toast.makeText(this, "Analysis timed out. Please check server.", Toast.LENGTH_SHORT).show()
         uiState = ScreenState.Standby

@@ -16,12 +16,17 @@ from app.services.storage import get_decompiled_dir
 
 logger = logging.getLogger(__name__)
 
-# Common third-party SDK prefixes to skip for high speed and minimal disk/RAM
+# Common third-party SDK and system framework prefixes to skip
 _FRAMEWORK_SKIP = (
     "android.", "androidx.", "kotlin.", "kotlinx.",
-    "com.google.android.", "com.google.firebase.",
-    "org.intellij.", "org.jetbrains.", "com.facebook."
+    "com.google.", "com.facebook.", "com.google.android.", "com.google.firebase.",
+    "org.intellij.", "org.jetbrains.", "okhttp3.", "retrofit2.",
+    "io.reactivex.", "com.bumptech.glide.", "org.apache.", "com.airbnb.",
+    "com.squareup.", "org.bouncycastle.", "com.fasterxml.", "io.grpc.",
+    "io.netty.", "com.amazon.", "com.adjust.", "com.appsflyer.", "io.flutter.",
+    "com.unity3d.", "com.flurry.", "com.mixpanel."
 )
+
 
 
 def run(scan_id: str, apk_path: str) -> bool:

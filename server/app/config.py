@@ -22,10 +22,10 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./sentinel.db"
     storage_dir: str = "./storage"
     max_upload_mb: int = 100
-    scan_timeout_seconds: int = 120
+    scan_timeout_seconds: int = 300  # 5 minutes for deep analysis & complex APKs
 
     # CORS — comma-separated origins in .env, parsed as list
-    cors_origins: str = "http://localhost:5173"
+    cors_origins: str = "*"
 
     # Decompiler
     jadx_path: str = "jadx"
@@ -34,7 +34,8 @@ class Settings(BaseSettings):
     llm_base_url: str = "https://api.openai.com/v1"
     llm_api_key: str = ""
     llm_model: str = "gpt-4o-mini"
-    llm_timeout_seconds: int = 45
+    llm_timeout_seconds: int = 60  # 60s for LLM JSON response
+
     llm_max_methods: int = 10
     llm_max_chars_per_method: int = 3000
 
