@@ -11,6 +11,8 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -76,8 +78,9 @@ fun StandbyScreen(
     history: List<ScanHistoryItem>,
     onSaveServerUrl: (String) -> Unit
 ) {
-    var serverUrlInput by remember { mutableStateOf(currentServerUrl) }
+    var serverUrlInput by remember(currentServerUrl) { mutableStateOf(currentServerUrl) }
     var isEditingServer by remember { mutableStateOf(false) }
+
 
     Column(
         modifier = Modifier
@@ -154,12 +157,16 @@ fun StandbyScreen(
                         color = TextMuted
                     )
                     Text(
-                        text = if (isEditingServer) "Done" else "Configure",
+                        text = if (isEditingServer) "Cancel" else "Configure",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         color = AccentSky,
-                        modifier = Modifier.padding(4.dp)
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .clickable { isEditingServer = !isEditingServer }
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
                     )
+
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
