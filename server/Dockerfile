@@ -1,15 +1,16 @@
 # Dockerfile for APK Sentinel Backend
 # Includes Python 3.11+, Java JRE (for jadx), and jadx decompilation toolchain.
 
-FROM python:3.11-slim
+FROM python:3.11-slim-bookworm
 
 # Install system dependencies & JRE (required by jadx)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    openjdk-17-jre-headless \
+    default-jre-headless \
     wget \
     unzip \
     curl \
     && rm -rf /var/lib/apt/lists/*
+
 
 # Install jadx release
 ENV JADX_VERSION=1.5.1
