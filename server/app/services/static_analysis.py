@@ -84,10 +84,10 @@ def run(apk_path: str) -> Dict[str, Any]:
         return result
 
 
-    try:
     # App metadata
     try:
         pkg_name = _safe(a.get_package) or getattr(a, "package", None) or "unknown.package"
+
         result["app_metadata"] = {
             "package_name": pkg_name,
             "label": _safe(a.get_app_name) or pkg_name.split(".")[-1].capitalize(),
